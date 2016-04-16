@@ -1,0 +1,30 @@
+var
+  f:text;
+begin
+  assign(f,'objsize.txt');
+  rewrite(f);
+  writeln(f,'tpoint',sizeof(tpoint));
+  writeln(f,'trect',sizeof(trect));
+  writeln(f,'ttask',sizeof(ttask));
+  writeln(f,'tkeybtask',sizeof(tkeybtask));
+  writeln(f,'ttimertask',sizeof(ttimertask));
+  writeln(f,'tview',sizeof(tview));
+  writeln(f,'tbutton',sizeof(tbutton));
+  writeln(f,'tclosebutton',sizeof(tclosebutton));
+  writeln(f,'tdialogbutton',sizeof(tdialogbutton));
+  writeln(f,'tdownbutton',sizeof(tdownbutton));
+  writeln(f,'tzoombutton',sizeof(tzoombutton));
+  writeln(f,'tclock',sizeof(tclock));
+  writeln(f,'tframe',sizeof(tframe));
+  writeln(f,'tgroup',sizeof(tgroup));
+  writeln(f,'tcontrolpanel',sizeof(tcontrolpanel));
+  writeln(f,'tshutdownview',sizeof(tshutdownview));
+  writeln(f,'tsonet',sizeof(tsonet));
+  writeln(f,'twindow',sizeof(twindow));
+  writeln(f,'tdialogwindow',sizeof(tdialogwindow));
+  writeln(f,'tmywindow',sizeof(tmywindow));
+  writeln(f,'twindowtitle',sizeof(twindowtitle));
+  writeln(f,'twinshortcut',sizeof(twinshortcut));
+  writeln(f,'tviewsteck',sizeof(tviewsteck));
+  close(f);
+end;

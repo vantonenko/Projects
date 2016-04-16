@@ -1,0 +1,19 @@
+  x:=xx-getmaxx div 2;
+  y:=-yy+getmaxy div 2;
+  {r:=sqrt(sqr(x)+sqr(y));}
+  if x>0 then
+    r:=arctan(y/x)
+   else
+    if x<0 then
+      r:=arctan(y/x)+pi
+     else
+      if y>=0 then
+        r:=pi/2
+       else
+        r:=3*pi/2;
+  r:=r+pi;
+  while r>2*pi do
+   r:=r-2*pi;
+  r:=sin(r)*r+cos(x)*y;
+  r:=40.584544769*r;
+  color:=abs(round(r/10)) mod maxcol+1

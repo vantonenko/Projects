@@ -1,0 +1,60 @@
+                       -= In Russian =-
+
+                          Модули
+
+GRAFIXX.PAS             Поддерживает режим 256-цветный режим
+                        с разрешением 320x240.
+                        Ошизенное разнообразие процедур и
+                        функций!
+PACKER.PAS              Используется модулем GRAFIXX.PAS
+GFXFONT.PAS             Содержит определение шрифта
+
+
+  Программы, демонстрирующие возможности перечисленных модулей:
+
+CLIPPEDX.PAS
+D3D'.PAS
+GFXXMOUS.PAS
+MODE_X.PAS
+MODE_X_T.PAS
+POLY_X.PAS
+SPRITE_X.PAS
+VIRTX.PAS
+
+                        Другое:
+
+GRIM.PCX                Картинка для программы CLIPPEDX.PAS
+
+                                               Автор: Алексей Фрунзе
+
+
+                         -= In English =-
+
+                               Units
+
+GRAFIXX.PAS             Graphic unit. 320x240 256-color mode supported
+                        A lot of procedures and functions!
+PACKER.PAS              Unit used by the GRAFIXX.PAS unit
+GFXFONT.PAS             Unit with font
+
+
+               Examples on GrafixX and GfxFont units
+
+CLIPPEDX.PAS
+D3D'.PAS
+GFXXMOUS.PAS
+MODE_X.PAS
+MODE_X_T.PAS
+POLY_X.PAS
+SPRITE_X.PAS
+VIRTX.PAS
+
+                             Other
+
+GRIM.PCX                Picture used by the CLIPPEDX.PAS example
+
+
+                                              Author: Alexei A. Frounze
+
+Homepage: http://www.chat.ru/~alexfru
+E-mail  : alexfru@chat.ru
