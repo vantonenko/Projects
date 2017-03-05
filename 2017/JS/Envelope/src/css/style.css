@@ -1,0 +1,15 @@
+.point {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    background-color:darkgreen;
+    z-index: 1000;
+}
+.line {
+    position: absolute;
+    border: 1px solid blue;
+    transform-origin: 0% 0%;
+    z-index: 999;
+    height: 0px;
+}
