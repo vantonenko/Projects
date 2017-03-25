@@ -9,8 +9,8 @@
 
 using namespace std;
 
-const int ThreadsSample::ThreadsCount = 16;
-const int ThreadsSample::TimeQuantLimit = 100;
+const int ThreadsSample::ThreadsCount = 32;
+const int ThreadsSample::TimeQuantLimit = 200;
 
 mutex ThreadsSample::mtx;
 
