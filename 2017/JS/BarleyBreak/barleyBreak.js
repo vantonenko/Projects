@@ -25,7 +25,7 @@ Array.prototype.print = function() {
 
     var width = Math.floor(Math.sqrt(this.length));
     for (var line of splitIterator.apply(this, [width])) {
-        console.log(line.join(" "));
+        console.log(line.join("\t"));
     }
 }
 
