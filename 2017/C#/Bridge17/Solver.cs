@@ -44,7 +44,7 @@ namespace Bridge17
             return false;
         }
 
-        public IReadOnlyCollection<State> Solve()
+        public IEnumerable<State> Solve()
         {
             var state = new State
             {
@@ -54,7 +54,7 @@ namespace Bridge17
             };
 
             NextStep(state, 0);
-            return _stateStack.ToArray();
+            return _stateStack.Reverse();
         }
     }
 }

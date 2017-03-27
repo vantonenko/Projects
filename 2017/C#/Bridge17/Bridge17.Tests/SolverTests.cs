@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Bridge17.Tests
@@ -48,7 +49,18 @@ namespace Bridge17.Tests
         [TestMethod]
         public void TestSolver()
         {
-            
+            IEnumerable<State> states = new Solver().Solve();
+
+            var actual = string.Join("|", states.Select(state =>
+            {
+                string flashAtLeft = state.IsFlashAtLeft ? " @" : "";
+                string flashAtRight = state.IsFlashAtLeft ? "" : "@ ";
+
+                return $"{string.Join(", ", state.Left)}{flashAtLeft} >==< {flashAtRight}{string.Join(", ", state.Right)}";
+            }));
+
+            var expected = "10, 5, 2, 1 @ >==< |10, 5 >==< @ 2, 1|10, 5, 2 @ >==< 1|2 >==< @ 1, 10, 5|2, 1 @ >==< 10, 5| >==< @ 10, 5, 2, 1";
+            Assert.AreEqual(actual, expected);
         }
     }
 }
