@@ -2,7 +2,7 @@ var solve = function() {
     var people = [10, 5, 2, 1];
 	var timeGoal = 17;	
 
-    var getAllCombinations = function(arr) {
+    var getAllPairs = function(arr) {
         var c = [];
         for (var i = 0; i < people.length; i++) {
             for (var j = i + 1; j < people.length; j++) {
@@ -11,7 +11,7 @@ var solve = function() {
         }
         return c;
     }
-	var moves = getAllCombinations(people).concat(people.map(e => [e]));	
+	var moves = getAllPairs(people).concat(people.map(e => [e]));	
 	
 	var state = {
         left: people.slice(),
@@ -51,6 +51,7 @@ var solve = function() {
             }
         }
 		stateStack.pop();
+        return false;
 	}
 	nextStep(state, 0);
 	return stateStack;
