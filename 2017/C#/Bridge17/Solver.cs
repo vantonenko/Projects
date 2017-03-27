@@ -19,6 +19,7 @@ namespace Bridge17
         private bool NextStep(State state, int time)
         {
             if (time > TimeGoal) return false;
+
             _stateStack.Push(state);
             if (time == TimeGoal && !state.Left.Any()) return true;
 
@@ -38,9 +39,7 @@ namespace Bridge17
             {
                 return true;
             }
-
             _stateStack.Pop();
-
             return false;
         }
 
