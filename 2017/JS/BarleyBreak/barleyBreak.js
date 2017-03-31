@@ -62,7 +62,7 @@ var solve = function() {
     var getZeroItemPosition = function(state) {
         var zeroItemIndex = state.indexOf(0);
         return {
-            index = zeroItemIndex,
+            index: zeroItemIndex,
             x: zeroItemIndex % sideLength,
             y: zeroItemIndex / sideLength
         };
@@ -71,9 +71,11 @@ var solve = function() {
     var isValidMove = function(itemPosition, move) {
         var newX = itemPosition.x + move[0];
         var newY = itemPosition.y + move[1];
-        return 
-            newX >= 0 && newX < sideLength &&
+
+        var isValidMove = newX >= 0 && newX < sideLength &&
             newY >= 0 && newY < sideLength;
+
+        return isValidMove;
     }
 
     var applyMove = function(state, itemPosition, move) {
@@ -112,4 +114,5 @@ var solve = function() {
     }
 }
 
+debugger;
 solve();
