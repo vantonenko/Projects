@@ -64,7 +64,7 @@ var solve = function() {
         return {
             index: zeroItemIndex,
             x: zeroItemIndex % sideLength,
-            y: zeroItemIndex / sideLength
+            y: Math.floor(zeroItemIndex / sideLength)
         };
     }
 
@@ -89,7 +89,7 @@ var solve = function() {
 
     var nextStep = function(state) {
         var stateHash = getStateHash(state);
-        
+
         if (stateHash == stateGoalHash) return true;
         if (visitState[stateHash]) return false;
         
@@ -109,10 +109,10 @@ var solve = function() {
 
     nextStep(initialState);
 
+    console.log("solution is found:")
     for (let state of stateStack) {
         printState(state);
     }
 }
 
-debugger;
 solve();
