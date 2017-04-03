@@ -84,7 +84,7 @@ var barleyBreakSolver = function() {
         return state.exchange(newIndex, itemPosition.index);
     }
 
-    this.getPrintState = function(state) {
+    var getPrintState = function(state) {
         function* splitIterator(chunkSize) {
             var cursor = 0;
             while (cursor < state.length) {
@@ -107,12 +107,10 @@ var barleyBreakSolver = function() {
         return printState.join("/n");
     }
 
-    this.printState = function(state) {
-        console.log(getPrintState(state));
-    }
-
-    this.getStateStack = function() {
-        return stateStack;
+    var visualiseState = function(state) {
+        var printState = getPrintState(state);
+        document.querySelector("div").innerHTML = 
+            `${printState.replace(/\/n/g, "<br>")}<br><br>stackSize:${stateStack.length}`;
     }
 
     this.compute = function() {
@@ -120,23 +118,24 @@ var barleyBreakSolver = function() {
 
         var interval = setInterval(() => {
             var state = stateStack.pop();
-            
-            var printState = solver.getPrintState(state);
-            document.querySelector("div").innerHTML = 
-                `${printState.replace(/\/n/g, "<br>")}<br><br>stackSize:${stateStack.length}`;
+        
+            visualiseState(state);
 
             var stateHash = getStateHash(state);
-            if (stateHash == stateGoalHash) clearInterval(interval);
             
+            if (stateHash == stateGoalHash) clearInterval(interval);
             if (visitState[stateHash]) return;
+            
             visitState[stateHash] = true;
 
             var position = getZeroItemPosition(state);
-            var possibleMoves = moves.filter(move => isValidMove(position, move));
-            for (let move of possibleMoves) {
-                var newState = applyMove(state, position, move);
-                stateStack.push(newState);
-            }
+            
+            var newStates = 
+                moves
+                    .filter(move => isValidMove(position, move))
+                    .map(move => applyMove(state, position, move));
+            
+            stateStack.push.apply(stateStack, newStates);
 
             if (stateStack.length == 0) clearInterval(interval);
         }, 0);
