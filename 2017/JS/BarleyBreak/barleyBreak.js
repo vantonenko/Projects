@@ -1,5 +1,9 @@
 var barleyBreakSolver = function() {
     var sideLength = 4;
+    var moves = 
+        [[-1,0],[0,-1],[1,0],[0,1]].map(v => { 
+            return { vector: { x: v[0], y: v[1] } } 
+        });
 
     var getStateHash = function(state) {
         return state.join(" ");
@@ -10,29 +14,11 @@ var barleyBreakSolver = function() {
         return state;
     }
 
-    var getMoves = function() {
-        var directions = ["left", "up", "right", "down"];
-        var vectors = [[-1,0],[0,-1],[1,0],[0,1]];
-
-        var i = 0;
-        return directions.map(direction => { 
-            var vector = vectors[i++];
-            return {
-                direction: direction,
-                vector: {
-                    x: vector[0],
-                    y: vector[1]
-                }
-            };
-        });
-    }
-
     var stateGoal = getStateGoal();
     var stateGoalHash = getStateHash(stateGoal);
 
     var initialState = stateGoal.shuffle();
     var visitState = {};
-    var moves = getMoves();
     var stateStack = [];
 
     var getZeroItemPosition = function(state) {
