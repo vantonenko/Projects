@@ -23,6 +23,14 @@ var state = function(stateArr) {
             .join("/n");
     }
 
+    this.isValidMove = function(move) {
+        var newX = this.zeroItem.x + move.x;
+        var newY = this.zeroItem.y + move.y;
+        var isValidMove = newX >= 0 && newX < this.sideLength &&
+            newY >= 0 && newY < this.sideLength;
+        return isValidMove;
+    }
+
     this.applyMove = function(move) {
         var newX = this.zeroItem.x + move.x;
         var newY = this.zeroItem.y + move.y;

@@ -14,17 +14,9 @@ var puzzle15Solver = function() {
     var visitState = {};
     var stateStack = [];
 
-    var isValidMove = function(itemPosition, move) {
-        var newX = itemPosition.x + move.x;
-        var newY = itemPosition.y + move.y;
-        var isValidMove = newX >= 0 && newX < sideLength &&
-            newY >= 0 && newY < sideLength;
-        return isValidMove;
-    }
-
     var getPossibleMovesIterator = function*(state) {
         for (let move of moves) {
-            if (!isValidMove(state.zeroItem, move)) continue;
+            if (!state.isValidMove(move)) continue;
             var nextMove = state.applyMove(move);
             if (visitState[nextMove.hash]) continue;
             yield nextMove;
