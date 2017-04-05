@@ -1,4 +1,4 @@
-var barleyBreakSolver = function() {
+var puzzle15Solver = function() {
     var sideLength = 3;
     var moves = 
         [[-1,0],[0,-1],[1,0],[0,1]].map(v => { 
@@ -49,7 +49,7 @@ var barleyBreakSolver = function() {
         return state
             .splitOnChunks(width)
             .map(chunk => chunk
-                .map(e => `${e}${(e > 9 ? "_" : "__")}`)
+                .map(e => `${e == 0 ? "_" : e}${(e > 9 ? "_" : "__")}`)
                 .join(""))
             .join("/n");
     }
@@ -59,10 +59,7 @@ var barleyBreakSolver = function() {
             var state = stateStack.last();
             var stateHash = getStateHash(state);
             visitState[stateHash] = true;
-            if (stateHash == stateGoalHash) {
-                yield true;
-                break;
-            }
+            if (stateHash == stateGoalHash) yield true;
             var zeroItemPosition = getZeroItemPosition(state);
             var possibleMoves = 
                 moves
@@ -80,6 +77,8 @@ var barleyBreakSolver = function() {
     }
 
     var visualizeState = function(state) {
+        if (!state) return;
+
         var printState = getPrintState(state);
         document.querySelector("div").innerHTML = 
             `${printState.replace(/\/n/g, "<br>")}<br><br>stackSize:${stateStack.length}`;
