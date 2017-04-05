@@ -9,10 +9,10 @@ function Puzzle15Solver() {
             var counter = 0, arr = new Array(sideLength * sideLength).fill(0).map(i => counter++);
             return new State(arr);
         })();
-
-    var initialState = stateGoal.shuffle();
     var visitState = {};
-    var stateStack = [];
+
+    this.initialState = stateGoal.shuffle();
+    this.stateStack = [];
 
     var getPossibleMovesIterator = function*(state) {
         for (let move of moves) {
@@ -23,50 +23,22 @@ function Puzzle15Solver() {
         }
     }
 
-    var computeIterator = function*() {
+    this.computeIterator = function*() {
+        this.stateStack.push(this.initialState);
+
         do {
-            var state = stateStack.last();
+            var state = this.stateStack.last();
             visitState[state.hash] = true;
             if (state.equals(stateGoal)) yield true;
             
             var possibleMoves = getPossibleMovesIterator(state);
             var nextMove = possibleMoves.next();
             if (nextMove.value) {
-                stateStack.push(nextMove.value);
+                this.stateStack.push(nextMove.value);
             } else {
-                stateStack.pop();
+                this.stateStack.pop();
             }
             yield false;
-        } while (stateStack.length > 0);
-    }
-
-    var visualizeState = function(state, selector = "div#solved") {
-        var element = document.querySelector(selector);
-        if (!state) {
-            element.style.color = "red";
-            return;
-        }
-
-        var printState = state.toString();
-        element.innerHTML = 
-            `${printState.replace(/\/n/g, "<br>")}<br><br>stackSize:${stateStack.length}`;
-    }
-
-    this.compute = function() {
-        stateStack.push(initialState);
-        visualizeState(initialState, "div#initial");
-
-        var iterator = computeIterator();
-        var interval = setInterval(() => {
-            visualizeState(stateStack.last());
-            for (let i of new Array(10 * 1000)) {
-                var iteration = iterator.next();
-                if (iteration.value || iteration.done) {
-                    visualizeState(stateStack.last());
-                    clearInterval(interval);
-                    break;
-                }
-            }
-        }, 0);
+        } while (this.stateStack.length > 0);
     }
 }

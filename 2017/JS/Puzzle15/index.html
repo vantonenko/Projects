@@ -15,7 +15,32 @@
         <div id="solved">computing...</div>
         <script>
             var solver = new Puzzle15Solver();
-            solver.compute();
+
+            var visualizeState = function(state, selector = "div#solved") {
+                var element = document.querySelector(selector);
+                if (!state) {
+                    element.style.color = "red";
+                    return;
+                }
+
+                var printState = state.toString();
+                element.innerHTML = 
+                    `${printState.replace(/\/n/g, "<br>")}<br><br>stackSize:${solver.stateStack.length}`;
+            }
+
+            visualizeState(solver.initialState, "div#initial");
+
+            var iterator = solver.computeIterator();
+            var interval = setInterval(() => {
+                for (let i of new Array(10 * 1000)) {
+                    var iteration = iterator.next();
+                    if (iteration.value || iteration.done) {
+                        clearInterval(interval);
+                        break;
+                    }
+                }
+                visualizeState(solver.stateStack.last());
+            }, 0);
         </script>
     </body>
 </html>
