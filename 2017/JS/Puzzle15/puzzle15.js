@@ -1,20 +1,19 @@
-var barleyBreakSolver = function() {
-    var sideLength = 4;
+var puzzle15Solver = function() {
+    var sideLength = 3;
     var moves = 
         [[-1,0],[0,-1],[1,0],[0,1]].map(v => { 
             return { vector: { x: v[0], y: v[1] } } 
         });
+    
+    var stateGoal = (function(){
+            var counter = 0, state = new Array(sideLength * sideLength).fill(0).map(i => counter++);
+            return state;
+        })();
 
     var getStateHash = function(state) {
         return state.join(" ");
     }
 
-    var getStateGoal = function() {
-        var counter = 0, state = new Array(sideLength * sideLength).fill(0).map(i => counter++);
-        return state;
-    }
-
-    var stateGoal = getStateGoal();
     var stateGoalHash = getStateHash(stateGoal);
 
     var initialState = stateGoal.shuffle();
@@ -50,37 +49,36 @@ var barleyBreakSolver = function() {
         return state
             .splitOnChunks(width)
             .map(chunk => chunk
-                .map(e => `${e}${(e > 9 ? "_" : "__")}`)
+                .map(e => `${e == 0 ? "_" : e}${(e > 9 ? "_" : "__")}`)
                 .join(""))
             .join("/n");
     }
 
-    var computeInerator = function*() {
+    var computeIterator = function*() {
         do {
-            var state = stateStack.pop();
+            var state = stateStack.last();
             var stateHash = getStateHash(state);
-            
-            if (stateHash == stateGoalHash) yield true;
-            if (visitState[stateHash]) {
-                yield false;
-                continue;
-            }
-            
             visitState[stateHash] = true;
-
+            if (stateHash == stateGoalHash) yield true;
             var zeroItemPosition = getZeroItemPosition(state);
-            var newStates = 
+            var possibleMoves = 
                 moves
-                    .filter(move => isValidMove(zeroItemPosition, move))
-                    .map(move => applyMove(state, zeroItemPosition, move));
+                    .filter(m => isValidMove(zeroItemPosition, m))
+                    .map(m => applyMove(state, zeroItemPosition, m))
+                    .filter(s => !visitState[getStateHash(s)]);
             
-            stateStack.push.apply(stateStack, newStates);
+            if (possibleMoves.length == 0) {
+                stateStack.pop();
+            } else {
+                stateStack.push(possibleMoves[0]);
+            }
             yield false;
-        
         } while (stateStack.length > 0);
     }
 
     var visualizeState = function(state) {
+        if (!state) return;
+
         var printState = getPrintState(state);
         document.querySelector("div").innerHTML = 
             `${printState.replace(/\/n/g, "<br>")}<br><br>stackSize:${stateStack.length}`;
@@ -89,14 +87,14 @@ var barleyBreakSolver = function() {
     this.compute = function() {
         stateStack.push(initialState);
 
-        var iterator = computeInerator();
+        var iterator = computeIterator();
 
         var interval = setInterval(() => {
             visualizeState(stateStack.last());
-
             for (let i of new Array(10 * 1000)) {
                 var iteration = iterator.next();
                 if (iteration.value || iteration.done) {
+                    visualizeState(stateStack.last());
                     clearInterval(interval);
                     break;
                 }
