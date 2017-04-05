@@ -76,16 +76,21 @@ var puzzle15Solver = function() {
         } while (stateStack.length > 0);
     }
 
-    var visualizeState = function(state) {
-        if (!state) return;
+    var visualizeState = function(state, selector = "div#solved") {
+        var element = document.querySelector(selector);
+        if (!state) {
+            element.style.color = "red";
+            return;
+        }
 
         var printState = getPrintState(state);
-        document.querySelector("div").innerHTML = 
+        element.innerHTML = 
             `${printState.replace(/\/n/g, "<br>")}<br><br>stackSize:${stateStack.length}`;
     }
 
     this.compute = function() {
         stateStack.push(initialState);
+        visualizeState(initialState, "div#initial");
 
         var iterator = computeIterator();
 

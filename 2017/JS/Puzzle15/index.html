@@ -3,13 +3,17 @@
     <header>
         <script src="arrayExtensions.js"></script>
         <script src="puzzle15.js"></script>
+        <style>
+            div {
+                font-family: 'DejaVu Sans Mono', monospace;
+            }
+        </style>
     </header>
     <body>
-        <div style="font-family: 'DejaVu Sans Mono', monospace;"></div>
+        <div id="initial"></div>
+        <div id="solved">computing...</div>
         <script>
             var solver = new puzzle15Solver();
-
-            document.querySelector("div").innerHTML = "computing";
             solver.compute();
         </script>
     </body>
