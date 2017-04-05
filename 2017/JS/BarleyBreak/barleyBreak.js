@@ -1,28 +1,3 @@
-Array.prototype.shuffle = function(times) {
-    var newArr = this.slice();
-
-    for (let i of new Array(this.length)) {
-        var i1 = Math.floor(Math.random() * newArr.length);
-        var i2 = Math.floor(Math.random() * newArr.length);
-        
-        var temp = newArr[i1];
-        newArr[i1] = newArr[i2];
-        newArr[i2] = temp;
-    }
-
-    return newArr;
-}
-
-Array.prototype.exchange = function(index1, index2) {
-    var newArr = this.slice();
-    
-    var temp = newArr[index1];
-    newArr[index1] = newArr[index2];
-    newArr[index2] = temp;
-
-    return newArr;
-}
-
 var barleyBreakSolver = function() {
     var sideLength = 4;
 
@@ -85,29 +60,16 @@ var barleyBreakSolver = function() {
     }
 
     var getPrintState = function(state) {
-        function* splitIterator(chunkSize) {
-            var cursor = 0;
-            while (cursor < state.length) {
-                var line = state.slice(cursor, cursor + chunkSize);
-                cursor += line.length;
-                yield line;
-            }    
-        }
-
         var width = Math.floor(Math.sqrt(state.length));
-
-        var printState = [];
-        for (var line of splitIterator(width)) {
-            printState.push(line.map(l => {
-                var sl = `${l}`;
-                return sl + (sl.length > 1 ? "_" : "__");
-            }).join(""));
-        }
-
-        return printState.join("/n");
+        return state
+            .splitOnChunks(width)
+            .map(chunk => chunk
+                .map(e => `${e}${(e > 9 ? "_" : "__")}`)
+                .join(""))
+            .join("/n");
     }
 
-    var visualiseState = function(state) {
+    var visualizeState = function(state) {
         var printState = getPrintState(state);
         document.querySelector("div").innerHTML = 
             `${printState.replace(/\/n/g, "<br>")}<br><br>stackSize:${stateStack.length}`;
@@ -119,7 +81,7 @@ var barleyBreakSolver = function() {
         var interval = setInterval(() => {
             var state = stateStack.pop();
         
-            visualiseState(state);
+            visualizeState(state);
 
             var stateHash = getStateHash(state);
             
