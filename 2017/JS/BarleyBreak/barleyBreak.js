@@ -1,5 +1,5 @@
 var barleyBreakSolver = function() {
-    var sideLength = 4;
+    var sideLength = 3;
     var moves = 
         [[-1,0],[0,-1],[1,0],[0,1]].map(v => { 
             return { vector: { x: v[0], y: v[1] } } 
@@ -59,7 +59,10 @@ var barleyBreakSolver = function() {
             var state = stateStack.last();
             var stateHash = getStateHash(state);
             visitState[stateHash] = true;
-            if (stateHash == stateGoalHash) yield true;
+            if (stateHash == stateGoalHash) {
+                yield true;
+                break;
+            }
             var zeroItemPosition = getZeroItemPosition(state);
             var possibleMoves = 
                 moves
@@ -89,10 +92,10 @@ var barleyBreakSolver = function() {
 
         var interval = setInterval(() => {
             visualizeState(stateStack.last());
-
             for (let i of new Array(10 * 1000)) {
                 var iteration = iterator.next();
                 if (iteration.value || iteration.done) {
+                    visualizeState(stateStack.last());
                     clearInterval(interval);
                     break;
                 }
