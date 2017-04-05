@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
     <header>
+        <script src="arrayExtensions.js"></script>
         <script src="barleyBreak.js"></script>
     </header>
     <body>
@@ -9,10 +10,7 @@
             var solver = new barleyBreakSolver();
 
             document.querySelector("div").innerHTML = "computing";
-
-            setTimeout(() => {
-                solver.compute();
-            }, 100);
+            solver.compute();
         </script>
     </body>
 </html>
