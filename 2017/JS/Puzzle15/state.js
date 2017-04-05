@@ -1,4 +1,4 @@
-var state = function(stateArr) {
+function State(stateArr) {
     var _state = stateArr;
     this.hash = _state.join(" ");
     this.sideLength = Math.floor(Math.sqrt(_state.length));
@@ -35,7 +35,7 @@ var state = function(stateArr) {
         var newX = this.zeroItem.x + move.x;
         var newY = this.zeroItem.y + move.y;
         var newIndex = newY * this.sideLength + newX;
-        return new state(_state.exchange(newIndex, this.zeroItem.index));
+        return new State(_state.exchange(newIndex, this.zeroItem.index));
     }
 
     this.equals = function(state) {
@@ -43,6 +43,6 @@ var state = function(stateArr) {
     }
 
     this.shuffle = function() {
-        return new state(_state.shuffle());
+        return new State(_state.shuffle());
     }
 }

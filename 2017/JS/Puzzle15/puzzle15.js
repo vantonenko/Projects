@@ -1,4 +1,4 @@
-var puzzle15Solver = function() {
+function Puzzle15Solver() {
     var sideLength = 3;
     var moves = 
         [[-1,0],[0,-1],[1,0],[0,1]].map(v => { 
@@ -7,7 +7,7 @@ var puzzle15Solver = function() {
     
     var stateGoal = (function(){
             var counter = 0, arr = new Array(sideLength * sideLength).fill(0).map(i => counter++);
-            return new state(arr);
+            return new State(arr);
         })();
 
     var initialState = stateGoal.shuffle();
