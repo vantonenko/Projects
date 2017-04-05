@@ -49,9 +49,19 @@ var puzzle15Solver = function() {
         return state
             .splitOnChunks(width)
             .map(chunk => chunk
-                .map(e => `${e == 0 ? "_" : e}${(e > 9 ? "_" : "__")}`)
-                .join(""))
+                .map(e => `${e == 0 ? "_" : e}${(e > 9 ? "" : "_")}`)
+                .join("|"))
             .join("/n");
+    }
+
+    var getPossibleMovesIterator = function*(state) {
+        var zeroItemPosition = getZeroItemPosition(state);
+        for (let move of moves) {
+            if (!isValidMove(zeroItemPosition, move)) continue;
+            var nextMove = applyMove(state, zeroItemPosition, move);
+            if (visitState[getStateHash(nextMove)]) continue;
+            yield nextMove;
+        }
     }
 
     var computeIterator = function*() {
@@ -60,17 +70,13 @@ var puzzle15Solver = function() {
             var stateHash = getStateHash(state);
             visitState[stateHash] = true;
             if (stateHash == stateGoalHash) yield true;
-            var zeroItemPosition = getZeroItemPosition(state);
-            var possibleMoves = 
-                moves
-                    .filter(m => isValidMove(zeroItemPosition, m))
-                    .map(m => applyMove(state, zeroItemPosition, m))
-                    .filter(s => !visitState[getStateHash(s)]);
             
-            if (possibleMoves.length == 0) {
-                stateStack.pop();
+            var possibleMoves = getPossibleMovesIterator(state);
+            var nextMove = possibleMoves.next();
+            if (nextMove.value) {
+                stateStack.push(nextMove.value);
             } else {
-                stateStack.push(possibleMoves[0]);
+                stateStack.pop();
             }
             yield false;
         } while (stateStack.length > 0);
