@@ -43,3 +43,8 @@ Array.prototype.splitIterator = function*(chunkSize) {
 Array.prototype.splitOnChunks = function(chunkSize) {
     return [].fillWithIterator(this.splitIterator(chunkSize));
 }
+
+Array.prototype.last = function() {
+    if (this.length == 0) return undefined;
+    return this.slice(-1)[0];
+}

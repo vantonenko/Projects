@@ -69,17 +69,9 @@ var barleyBreakSolver = function() {
             .join("/n");
     }
 
-    var visualizeState = function(state) {
-        var printState = getPrintState(state);
-        document.querySelector("div").innerHTML = 
-            `${printState.replace(/\/n/g, "<br>")}<br><br>stackSize:${stateStack.length}`;
-    }
-
     var computeInerator = function*() {
         do {
             var state = stateStack.pop();
-            visualizeState(state);
-
             var stateHash = getStateHash(state);
             
             if (stateHash == stateGoalHash) yield true;
@@ -102,16 +94,26 @@ var barleyBreakSolver = function() {
         } while (stateStack.length > 0);
     }
 
+    var visualizeState = function(state) {
+        var printState = getPrintState(state);
+        document.querySelector("div").innerHTML = 
+            `${printState.replace(/\/n/g, "<br>")}<br><br>stackSize:${stateStack.length}`;
+    }
+
     this.compute = function() {
         stateStack.push(initialState);
 
         var iterator = computeInerator();
 
         var interval = setInterval(() => {
-            var iteration = iterator.next();
+            visualizeState(stateStack.last());
 
-            if (iteration.value || iteration.done) {
-                clearInterval(interval);
+            for (let i of new Array(10 * 1000)) {
+                var iteration = iterator.next();
+                if (iteration.value || iteration.done) {
+                    clearInterval(interval);
+                    break;
+                }
             }
         }, 0);
     }
