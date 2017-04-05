@@ -107,7 +107,7 @@ var barleyBreakSolver = function() {
         return printState.join("/n");
     }
 
-    var visualiseState = function(state) {
+    var visualizeState = function(state) {
         var printState = getPrintState(state);
         document.querySelector("div").innerHTML = 
             `${printState.replace(/\/n/g, "<br>")}<br><br>stackSize:${stateStack.length}`;
@@ -119,7 +119,7 @@ var barleyBreakSolver = function() {
         var interval = setInterval(() => {
             var state = stateStack.pop();
         
-            visualiseState(state);
+            visualizeState(state);
 
             var stateHash = getStateHash(state);
             
