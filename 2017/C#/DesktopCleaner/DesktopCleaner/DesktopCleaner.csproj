@@ -56,6 +56,7 @@
     <Compile Include="DesktopCleaner.Designer.cs">
       <DependentUpon>DesktopCleaner.cs</DependentUpon>
     </Compile>
+    <Compile Include="Processor.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="ProjectInstaller.cs">
       <SubType>Component</SubType>
