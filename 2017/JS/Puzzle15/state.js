@@ -49,7 +49,13 @@ function State(o) {
     }
 
     this.shuffle = function() {
-        return new State(_state.shuffle());
+        var state = new State(this.sideLength);
+        for (let i of new Array(100)) {
+            var move = State.moves.filter(m => !state.isMoveExceedBoundary(m)).pickRandom();
+            state = state.applyMove(move);
+        }
+
+        return state;
     }
 }
 

@@ -1,16 +1,5 @@
-Array.prototype.shuffle = function(times) {
-    var newArr = this.slice();
-
-    for (let i of new Array(this.length)) {
-        var i1 = Math.floor(Math.random() * newArr.length);
-        var i2 = Math.floor(Math.random() * newArr.length);
-        
-        var temp = newArr[i1];
-        newArr[i1] = newArr[i2];
-        newArr[i2] = temp;
-    }
-
-    return newArr;
+Array.prototype.pickRandom = function() {
+    return this[Math.floor(Math.random() * this.length)];
 }
 
 Array.prototype.exchange = function(index1, index2) {
