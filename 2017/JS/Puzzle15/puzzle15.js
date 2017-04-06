@@ -13,7 +13,7 @@ function Puzzle15Solver() {
 
     var getPossibleMovesIterator = function*(state) {
         for (let move of moves) {
-            if (!state.isValidMove(move)) continue;
+            if (state.isMoveExceedBoundary(move)) continue;
             var nextMove = state.applyMove(move);
             if (visitState[nextMove.hash]) continue;
             yield nextMove;
