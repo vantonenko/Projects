@@ -1,5 +1,11 @@
-function State(stateArr) {
-    var _state = stateArr;
+function State(o) {
+    var _state = o;
+    if (!o.length) {
+        var sideLength = o;
+        var counter = 0, arr = new Array(sideLength * sideLength).fill(0).map(i => counter++);
+        _state = arr;
+    }
+
     this.hash = _state.join(" ");
     this.sideLength = Math.floor(Math.sqrt(_state.length));
 

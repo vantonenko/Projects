@@ -4,12 +4,9 @@ function Puzzle15Solver() {
         [[-1,0],[0,-1],[1,0],[0,1]].map(v => { 
             return { x: v[0], y: v[1] } 
         });
-    
-    var stateGoal = (function(){
-            var counter = 0, arr = new Array(sideLength * sideLength).fill(0).map(i => counter++);
-            return new State(arr);
-        })();
+
     var visitState = {};
+    var stateGoal = new State(sideLength);
 
     this.initialState = stateGoal.shuffle();
     this.stateStack = [];
