@@ -1,9 +1,5 @@
 function Puzzle15Solver() {
     var sideLength = 3;
-    var moves = 
-        [[-1,0],[0,-1],[1,0],[0,1]].map(v => { 
-            return { x: v[0], y: v[1] } 
-        });
 
     var visitState = {};
     var stateGoal = new State(sideLength);
@@ -12,7 +8,7 @@ function Puzzle15Solver() {
     this.stateStack = [];
 
     var getPossibleMovesIterator = function*(state) {
-        for (let move of moves) {
+        for (let move of State.moves) {
             if (state.isMoveExceedBoundary(move)) continue;
             var nextMove = state.applyMove(move);
             if (visitState[nextMove.hash]) continue;

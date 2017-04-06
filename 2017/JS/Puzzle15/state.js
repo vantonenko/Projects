@@ -52,3 +52,8 @@ function State(o) {
         return new State(_state.shuffle());
     }
 }
+
+State.moves = 
+    [[-1,0],[0,-1],[1,0],[0,1]].map(v => { 
+        return { x: v[0], y: v[1] } 
+    });
