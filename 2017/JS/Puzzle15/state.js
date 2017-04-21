@@ -1,5 +1,11 @@
-function State(stateArr) {
-    var _state = stateArr;
+function State(o) {
+    var _state = o;
+    if (!o.length) {
+        var sideLength = o;
+        var counter = 0, arr = new Array(sideLength * sideLength).fill(0).map(i => counter++);
+        _state = arr;
+    }
+
     this.hash = _state.join(" ");
     this.sideLength = Math.floor(Math.sqrt(_state.length));
 
@@ -23,12 +29,12 @@ function State(stateArr) {
             .join("/n");
     }
 
-    this.isValidMove = function(move) {
+    this.isMoveExceedBoundary = function(move) {
         var newX = this.zeroItem.x + move.x;
         var newY = this.zeroItem.y + move.y;
         var isValidMove = newX >= 0 && newX < this.sideLength &&
             newY >= 0 && newY < this.sideLength;
-        return isValidMove;
+        return !isValidMove;
     }
 
     this.applyMove = function(move) {
@@ -43,6 +49,17 @@ function State(stateArr) {
     }
 
     this.shuffle = function() {
-        return new State(_state.shuffle());
+        var state = new State(this.sideLength);
+        for (let i of new Array(100)) {
+            var move = State.moves.filter(m => !state.isMoveExceedBoundary(m)).pickRandom();
+            state = state.applyMove(move);
+        }
+
+        return state;
     }
 }
+
+State.moves = 
+    [[-1,0],[0,-1],[1,0],[0,1]].map(v => { 
+        return { x: v[0], y: v[1] } 
+    });

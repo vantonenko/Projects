@@ -1,22 +1,15 @@
 function Puzzle15Solver() {
     var sideLength = 3;
-    var moves = 
-        [[-1,0],[0,-1],[1,0],[0,1]].map(v => { 
-            return { x: v[0], y: v[1] } 
-        });
-    
-    var stateGoal = (function(){
-            var counter = 0, arr = new Array(sideLength * sideLength).fill(0).map(i => counter++);
-            return new State(arr);
-        })();
+
     var visitState = {};
+    var stateGoal = new State(sideLength);
 
     this.initialState = stateGoal.shuffle();
     this.stateStack = [];
 
     var getPossibleMovesIterator = function*(state) {
-        for (let move of moves) {
-            if (!state.isValidMove(move)) continue;
+        for (let move of State.moves) {
+            if (state.isMoveExceedBoundary(move)) continue;
             var nextMove = state.applyMove(move);
             if (visitState[nextMove.hash]) continue;
             yield nextMove;
