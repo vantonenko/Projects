@@ -1,3 +1,5 @@
+// Find a solution for https://en.wikipedia.org/wiki/Bridge_and_torch_problem
+
 var solve = function() {
     var people = [10, 5, 2, 1];
     var timeGoal = 17;    
