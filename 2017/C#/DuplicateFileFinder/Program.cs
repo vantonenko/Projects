@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace DuplicateFileFinder
 {
-    internal class Program
+    internal static class Program
     {
         private const string FolderPath = @"E:\_Photo1";
         private const string OutputPath = @"E:\__duplicate_Photo1";
