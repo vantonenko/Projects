@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script src="http://knockoutjs.com/downloads/knockout-3.4.2.js"></script>
+</head>
+<body>
+	<div data-bind="text: x"></div>
+	<div data-bind="text: y"></div>
+	<div data-bind="text: w"></div>
+	<div>===================</div>
+	<!-- ko foreach: z -->
+	<div data-bind="text: $data"></div>
+	<!-- /ko -->
+
+	<script lang="javascript">
+		var index = 0;
+		var viewModel = {
+			x: ko.observable(1),
+			y: ko.observable(2),
+			z: new Array(10).fill(0).map(i => ko.observable(index++)) 
+		}
+		viewModel.w = ko.computed(function() { return this.x() + this.y() }, viewModel);
+
+		ko.applyBindings(viewModel);
+
+		var inc = function(val) {
+			val(val() + 1);
+		};
+
+		setInterval(() => {
+			inc(viewModel.x);
+			inc(viewModel.y);
+			viewModel.z.map(i => inc(i));
+		}, 500);
+	</script>
+</body>
+</html>
