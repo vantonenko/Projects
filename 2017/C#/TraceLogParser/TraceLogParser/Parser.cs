@@ -27,10 +27,10 @@ namespace TraceLogParser
                 {
                     Time = match.Groups["time"].Value,
                     ProcessId = match.Groups["pid"].Value,
-                    Level = match.Groups["level"].Length,
+                    LevelSpaces = match.Groups["level"].Value,
                     Actor = match.Groups["actor"].Value,
                     Action = match.Groups["action"].Value,
-                    ActionType = match.Groups["actionType"].Value,
+                    ActionType = match.Groups["actionType"].Value == "entry" ? ActionType.Entry : ActionType.Exit,
                     Duration = match.Groups["duration"].Value,
                     ReturnValue = match.Groups["returnValue"].Value,
                     Line = match.Groups["line"].Value,

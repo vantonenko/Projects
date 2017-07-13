@@ -9,13 +9,11 @@ namespace TraceLogParser
 
         public string ProcessId { get; set; }
 
-        public int Level { get; set; }
-
         public string Actor { get; set; }
 
         public string Action { get; set; }
 
-        public string ActionType { get; set; }
+        public ActionType ActionType { get; set; }
 
         public string Duration { get; set; }
 
@@ -27,13 +25,24 @@ namespace TraceLogParser
 
         public string OriginalLine { get; set; }
 
-        private string LevelSpaces => new string(' ', ActionType == "exit" ? Level : Level - 2);
+        public string LevelSpaces { get; set; }
+
+        /// <summary>
+        /// Somehow the 'entry' seems record always has a 2 spaces shift
+        /// </summary>
+        public int Level => ActionType == ActionType.Entry ? LevelSpaces.Length - 2 : LevelSpaces.Length;
 
         private string Details =>
-            ActionType == "exit" ? 
+            ActionType == ActionType.Exit ? 
                 $" Duration: {Duration} ms. Returned value: {ReturnValue}" :
                 $"(in : line {Line})";
 
-        public string PatchedLine => $"{Time} <{ProcessId}>{LevelSpaces}{Actor}:{Action} {ActionType}.{Details}";
+        public string PatchedLine => $"{Time} <{ProcessId}>{new string(' ', Level)}{Actor}:{Action} {ActionType}.{Details}";
+    }
+
+    public enum ActionType
+    {
+        Entry,
+        Exit
     }
 }
