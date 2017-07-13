@@ -14,7 +14,7 @@ namespace TraceLogParser
         // 04:06:14.644 <4672>     TcmPublisher: TransportEngine.GetDeploymentFeedback() entry.(in : line 162)
         private readonly Regex _regex = 
             new Regex(
-                @"(?<time>\d\d:\d\d:\d\d\.\d\d\d) <(?<pid>\d*)>(?<level> *)(?<actor>[^:]*): (?<action>[^ ]*) (?<actionType>[^\.]*)\.((\(in : line (?<line>\d*)\))|( Duration: (?<duration>\d*) ms\. Returned value: (?<returnValue>.*)))");
+                @"(?<time>\d\d:\d\d:\d\d\.\d\d\d) <(?<pid>\d*)>(?<level> *)(?<actor>[^:]*): (?<action>.*) (?<actionType>(entry)|(exit))\.((\(in : line (?<line>\d*)\))|( Duration: (?<duration>\d*) ms\. Returned value: (?<returnValue>.*)))");
 
         public void Proceed()
         {

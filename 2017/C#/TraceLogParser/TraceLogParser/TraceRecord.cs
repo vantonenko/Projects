@@ -37,7 +37,7 @@ namespace TraceLogParser
                 $" Duration: {Duration} ms. Returned value: {ReturnValue}" :
                 $"(in : line {Line})";
 
-        public string PatchedLine => $"{Time} <{ProcessId}>{new string(' ', Level)}{Actor}:{Action} {ActionType}.{Details}";
+        public string PatchedLine => $"{Time} <{ProcessId}>{new string(' ', Level)}{Actor}: {Action} {ActionType}.{Details}";
     }
 
     public enum ActionType
