@@ -43,6 +43,23 @@ namespace TraceLogParser
     public enum ActionType
     {
         Entry,
-        Exit
+        Exit,
+        None
+    }
+
+    public static class StringExtensions
+    {
+        public static ActionType ParseAction(this string actionString)
+        {
+            switch (actionString)
+            {
+                case "entry":
+                    return ActionType.Entry;
+                case "exit":
+                    return ActionType.Exit;
+                default:
+                    return ActionType.None;
+            }
+        }
     }
 }

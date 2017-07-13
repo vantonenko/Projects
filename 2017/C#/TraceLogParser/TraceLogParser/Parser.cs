@@ -30,7 +30,7 @@ namespace TraceLogParser
                     LevelSpaces = match.Groups["level"].Value,
                     Actor = match.Groups["actor"].Value,
                     Action = match.Groups["action"].Value,
-                    ActionType = match.Groups["actionType"].Value == "entry" ? ActionType.Entry : ActionType.Exit,
+                    ActionType = match.Groups["actionType"].Value.ParseAction(),
                     Duration = match.Groups["duration"].Value,
                     ReturnValue = match.Groups["returnValue"].Value,
                     Line = match.Groups["line"].Value,
