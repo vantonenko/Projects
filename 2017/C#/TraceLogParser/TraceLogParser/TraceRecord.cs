@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace TraceLogParser
 {
-    public class TraceRecord
+    public class TraceRecordLine
     {
         public string Time { get; set; }
 

@@ -43,6 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Parser.cs" />
+    <Compile Include="ProcessTraceRecord.cs" />
     <Compile Include="TraceRecord.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

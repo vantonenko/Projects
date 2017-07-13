@@ -18,12 +18,17 @@ namespace TraceLogParser
 
         public void Proceed()
         {
+            SplitTraceRecordsFile();
+        }
+
+        private IEnumerable<ProcessTraceRecordLines> GetProcessesTraceRecordLines()
+        {
             int order = 0;
-            IEnumerable<TraceRecord> enumerableTraceRecords = File
+            IEnumerable<TraceRecordLine> traceRecordLines = File
                 .ReadLines(FilePath)
                 .Select(line => _regex.Match(line))
                 .Where(match => match.Success)
-                .Select(match => new TraceRecord
+                .Select(match => new TraceRecordLine
                 {
                     Time = match.Groups["time"].Value,
                     ProcessId = match.Groups["pid"].Value,
@@ -38,20 +43,27 @@ namespace TraceLogParser
                     OriginalLine = match.Value
                 });
 
-            var groupByProcessId = 
-                enumerableTraceRecords
+            IEnumerable<ProcessTraceRecordLines> processesTraceRecordLines =
+                traceRecordLines
                     .GroupBy(record => record.ProcessId)
-                    .Select(g => new
+                    .Select(g => new ProcessTraceRecordLines()
                     {
                         ProcessId = g.Key,
-                        TraceRecords = g.OrderBy(record => record.Order)
+                        TraceRecordLines = g.OrderBy(record => record.Order)
                     });
 
-            foreach (var processRecord in groupByProcessId)
+            return processesTraceRecordLines;
+        }
+
+        private void SplitTraceRecordsFile()
+        {
+            IEnumerable<ProcessTraceRecordLines> processesTraceRecordLines = GetProcessesTraceRecordLines();
+
+            foreach (var processTraceRecordLines in processesTraceRecordLines)
             {
                 File.WriteAllLines(
-                    Path.Combine(OutDirectory, $"Process_{processRecord.ProcessId}.txt"), 
-                    processRecord.TraceRecords.Select(record => record.PatchedLine));
+                    Path.Combine(OutDirectory, $"Process_{processTraceRecordLines.ProcessId}.txt"),
+                    processTraceRecordLines.TraceRecordLines.Select(record => record.PatchedLine));
             }
         }
     }
