@@ -5,6 +5,7 @@ namespace TraceLogParser
     internal class TraceScope
     {
         public string Action { get; set; }
+        public string Actor { get; set; }
         public string Duration { get; set; }
         public string Time { get; set; }
         public int Order { get; set; }

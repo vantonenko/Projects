@@ -59,6 +59,7 @@ namespace TraceLogParser
                             var scope = new TraceScope
                             {
                                 Action = record.Action,
+                                Actor = record.Actor,
                                 Time = record.Time,
                                 Order = record.Order
                             };
@@ -91,7 +92,7 @@ namespace TraceLogParser
             foreach (TraceScope traceScope in scope.Entries)
             {
                 traceScopeCompact.Add(
-                    $"{traceScope.Time}[{traceScope.Duration}] {traceScope.Action} @{traceScope.Order}", 
+                    $"{traceScope.Time} [{traceScope.Duration} ms] {traceScope.Actor}:{traceScope.Action} @{traceScope.Order}", 
                     BuildCompactTraceScope(traceScope));
             }
 
