@@ -11,7 +11,7 @@ namespace TraceLogParser
         private const string FilePath = @"D:\Workflow\TraceLog_Parser\tcm_trace.log.txt";
         private const string OutPath = @"D:\Workflow\TraceLog_Parser\";
 
-        private readonly Regex _regex = 
+        private readonly Regex _regex =
             new Regex(@"(?<time>\d\d:\d\d:\d\d\.\d\d\d) <(?<pid>\d\d\d\d)>(?<depthSpaces> *)(?<actor>[^:]*): (?<action>(.|\n|\r)*?(?=\d\d:\d\d:\d\d\.\d\d\d <\d\d\d\d>)|(.*$))");
 
         public void Run()
@@ -47,7 +47,7 @@ namespace TraceLogParser
                 File.WriteAllLines(
                     Path.Combine(OutPath, $"Process_{process.Pid}.txt"),
                     process.Records.Select(record => record.AsPatchedString));
-            
+
                 var stack = new Stack<TraceScope>();
                 var currentScope = new TraceScope();
 
@@ -56,12 +56,18 @@ namespace TraceLogParser
                     switch (record.ActionType)
                     {
                         case ActionType.Entry:
-                            var scope = new TraceScope();
-                            currentScope.Add($"{record.Time}[{record.Duration}] {record.Action} @{record.Order}", scope);
+                            var scope = new TraceScope
+                            {
+                                Action = record.Action,
+                                Time = record.Time,
+                                Order = record.Order
+                            };
+                            currentScope.Entries.Add(scope);
                             stack.Push(currentScope);
                             currentScope = scope;
                             break;
                         case ActionType.Exit:
+                            currentScope.Duration = record.Duration;
                             currentScope = stack.Pop();
                             break;
                         case ActionType.None:
@@ -72,9 +78,24 @@ namespace TraceLogParser
                 // we may have missing exit records
                 while (stack.Count > 0) currentScope = stack.Pop();
 
-                string json = JsonConvert.SerializeObject(currentScope, Formatting.Indented);
+                TraceScopeCompact traceScopeCompact = BuildCompactTraceScope(currentScope);
+                string json = JsonConvert.SerializeObject(traceScopeCompact, Formatting.Indented);
                 File.WriteAllText(Path.Combine(OutPath, $"Process_{process.Pid}.json"), json);
             }
+        }
+
+        private TraceScopeCompact BuildCompactTraceScope(TraceScope scope)
+        {
+            var traceScopeCompact = new TraceScopeCompact();
+
+            foreach (TraceScope traceScope in scope.Entries)
+            {
+                traceScopeCompact.Add(
+                    $"{traceScope.Time}[{traceScope.Duration}] {traceScope.Action} @{traceScope.Order}", 
+                    BuildCompactTraceScope(traceScope));
+            }
+
+            return traceScopeCompact;
         }
     }
 }
