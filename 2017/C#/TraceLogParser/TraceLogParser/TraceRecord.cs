@@ -1,43 +1,26 @@
-﻿using System;
-using System.Linq;
+﻿using System.Text.RegularExpressions;
 
 namespace TraceLogParser
 {
-    public class TraceRecordLine
+    public class TraceRecord
     {
+        // ReSharper disable UnusedAutoPropertyAccessor.Global
         public string Time { get; set; }
-
-        public string ProcessId { get; set; }
-
+        public string Pid { get; set; }
+        public string DepthSpaces { get; set; }
         public string Actor { get; set; }
-
         public string Action { get; set; }
-
         public ActionType ActionType { get; set; }
-
-        public string Duration { get; set; }
-
-        public string ReturnValue { get; set; }
-
-        public string Line { get; set; }
-
+        public string AsOriginalString { get; set; }
         public int Order { get; set; }
+        // ReSharper restore UnusedAutoPropertyAccessor.Global
 
-        public string OriginalLine { get; set; }
+        public string Duration => new Regex(@"Duration: (?<duration>\d*) ms.").Match(Action).Groups["duration"].Value;
 
-        public string LevelSpaces { get; set; }
-
-        /// <summary>
-        /// Somehow the 'entry' seems record always has a 2 spaces shift
-        /// </summary>
-        public int Level => ActionType == ActionType.Entry ? LevelSpaces.Length - 2 : LevelSpaces.Length;
-
-        private string Details =>
-            ActionType == ActionType.Exit ? 
-                $" Duration: {Duration} ms. Returned value: {ReturnValue}" :
-                $"(in : line {Line})";
-
-        public string PatchedLine => $"{Time} <{ProcessId}>{new string(' ', Level)}{Actor}: {Action} {ActionType}.{Details}";
+        public string AsPatchedString =>
+            (ActionType == ActionType.Entry
+                ? AsOriginalString.Replace(DepthSpaces, new string(' ', DepthSpaces.Length - 2))
+                : AsOriginalString).TrimEnd('\n', '\r');
     }
 
     public enum ActionType
@@ -49,17 +32,13 @@ namespace TraceLogParser
 
     public static class StringExtensions
     {
-        public static ActionType ParseAction(this string actionString)
+        public static ActionType ParseActionType(this string action)
         {
-            switch (actionString)
-            {
-                case "entry":
-                    return ActionType.Entry;
-                case "exit":
-                    return ActionType.Exit;
-                default:
-                    return ActionType.None;
-            }
+            return action.Contains(" entry.")
+                ? ActionType.Entry
+                : action.Contains(" exit. Duration: ")
+                    ? ActionType.Exit
+                    : ActionType.None;
         }
     }
 }

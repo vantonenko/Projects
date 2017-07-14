@@ -1,69 +1,80 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Newtonsoft.Json;
 
 namespace TraceLogParser
 {
     internal class Parser
     {
         private const string FilePath = @"D:\Workflow\TraceLog_Parser\tcm_trace.log.txt";
-        private const string OutDirectory = @"D:\Workflow\TraceLog_Parser\";
+        private const string OutPath = @"D:\Workflow\TraceLog_Parser\";
 
-        // 04:06:14.646 <4672>     TcmPublisher: TransportEngine.GetDeploymentFeedback() exit. Duration: 1 ms. Returned value: '{}'
-        // 04:06:14.644 <4672>     TcmPublisher: TransportEngine.GetDeploymentFeedback() entry.(in : line 162)
         private readonly Regex _regex = 
-            new Regex(
-                @"(?<time>\d\d:\d\d:\d\d\.\d\d\d) <(?<pid>\d*)>(?<level> *)(?<actor>[^:]*): (?<action>.*) (?<actionType>(entry)|(exit))\.((\(in : line (?<line>\d*)\))|( Duration: (?<duration>\d*) ms\. Returned value: (?<returnValue>.*)))");
+            new Regex(@"(?<time>\d\d:\d\d:\d\d\.\d\d\d) <(?<pid>\d\d\d\d)>(?<depthSpaces> *)(?<actor>[^:]*): (?<action>(.|\n|\r)*?(?=\d\d:\d\d:\d\d\.\d\d\d <\d\d\d\d>)|(.*$))");
 
-        public void Proceed()
-        {
-            SplitTraceRecordsFile();
-        }
-
-        private IEnumerable<ProcessTraceRecordLines> GetProcessesTraceRecordLines()
+        public void Run()
         {
             int order = 0;
-            IEnumerable<TraceRecordLine> traceRecordLines = File
-                .ReadLines(FilePath)
-                .Select(line => _regex.Match(line))
-                .Where(match => match.Success)
-                .Select(match => new TraceRecordLine
+            List<TraceRecord> records = _regex
+                .Matches(File.ReadAllText(FilePath))
+                .Cast<Match>()
+                .Select(m => new TraceRecord
                 {
-                    Time = match.Groups["time"].Value,
-                    ProcessId = match.Groups["pid"].Value,
-                    LevelSpaces = match.Groups["level"].Value,
-                    Actor = match.Groups["actor"].Value,
-                    Action = match.Groups["action"].Value,
-                    ActionType = match.Groups["actionType"].Value.ParseAction(),
-                    Duration = match.Groups["duration"].Value,
-                    ReturnValue = match.Groups["returnValue"].Value,
-                    Line = match.Groups["line"].Value,
-                    Order = order++, // time may be not precise enough if we later need to get the initial order of records
-                    OriginalLine = match.Value
-                });
+                    Time = m.Groups["time"].Value,
+                    Pid = m.Groups["pid"].Value,
+                    DepthSpaces = m.Groups["depthSpaces"].Value,
+                    Actor = m.Groups["actor"].Value,
+                    Action = m.Groups["action"].Value.TrimEnd('\n', '\r'),
+                    ActionType = m.Groups["action"].Value.ParseActionType(),
+                    AsOriginalString = m.Value,
+                    Order = order++
+                })
+                .ToList();
 
-            IEnumerable<ProcessTraceRecordLines> processesTraceRecordLines =
-                traceRecordLines
-                    .GroupBy(record => record.ProcessId)
-                    .Select(g => new ProcessTraceRecordLines()
-                    {
-                        ProcessId = g.Key,
-                        TraceRecordLines = g.OrderBy(record => record.Order)
-                    });
-
-            return processesTraceRecordLines;
-        }
-
-        private void SplitTraceRecordsFile()
-        {
-            IEnumerable<ProcessTraceRecordLines> processesTraceRecordLines = GetProcessesTraceRecordLines();
-
-            foreach (var processTraceRecordLines in processesTraceRecordLines)
+            var processes = records
+                .GroupBy(r => r.Pid)
+                .Select(g => new
+                {
+                    Pid = g.Key,
+                    Records = g.OrderBy(r => r.Order).ToList()
+                })
+                .ToList();
+            
+            foreach (var process in processes)
             {
                 File.WriteAllLines(
-                    Path.Combine(OutDirectory, $"Process_{processTraceRecordLines.ProcessId}.txt"),
-                    processTraceRecordLines.TraceRecordLines.Select(record => record.PatchedLine));
+                    Path.Combine(OutPath, $"Process_{process.Pid}.txt"), 
+                    process.Records.Select(record => record.AsPatchedString));
+
+                var stack = new Stack<TraceScope>();
+                var currentScope = new TraceScope();
+
+                foreach (TraceRecord record in process.Records)
+                {
+                    switch (record.ActionType)
+                    {
+                        case ActionType.Entry:
+                            var scope = new TraceScope { Action = record.Action };
+                            currentScope.Entries.Add(scope);
+                            stack.Push(currentScope);
+                            currentScope = scope;
+                            break;
+                        case ActionType.Exit:
+                            currentScope.Duration = record.Duration;
+                            currentScope = stack.Pop();
+                            break;
+                        case ActionType.None:
+                            break;
+                    }
+                }
+
+                // we may have missing exit records
+                while (stack.Count > 0) currentScope = stack.Pop();
+
+                string json = JsonConvert.SerializeObject(currentScope, Formatting.Indented);
+                File.WriteAllText(Path.Combine(OutPath, $"Process_{process.Pid}.json"), json);
             }
         }
     }

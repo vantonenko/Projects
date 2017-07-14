@@ -4,7 +4,7 @@
     {
         private static void Main()
         {
-            new Parser().Proceed();
+            new Parser().Run();
         }
     }
 }
