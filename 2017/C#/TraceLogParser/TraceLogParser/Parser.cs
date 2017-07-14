@@ -41,13 +41,13 @@ namespace TraceLogParser
                     Records = g.OrderBy(r => r.Order).ToList()
                 })
                 .ToList();
-            
+
             foreach (var process in processes)
             {
                 File.WriteAllLines(
-                    Path.Combine(OutPath, $"Process_{process.Pid}.txt"), 
+                    Path.Combine(OutPath, $"Process_{process.Pid}.txt"),
                     process.Records.Select(record => record.AsPatchedString));
-
+            
                 var stack = new Stack<TraceScope>();
                 var currentScope = new TraceScope();
 
@@ -56,13 +56,12 @@ namespace TraceLogParser
                     switch (record.ActionType)
                     {
                         case ActionType.Entry:
-                            var scope = new TraceScope { Action = record.Action };
-                            currentScope.Entries.Add(scope);
+                            var scope = new TraceScope();
+                            currentScope.Add($"{record.Time}[{record.Duration}] {record.Action} @{record.Order}", scope);
                             stack.Push(currentScope);
                             currentScope = scope;
                             break;
                         case ActionType.Exit:
-                            currentScope.Duration = record.Duration;
                             currentScope = stack.Pop();
                             break;
                         case ActionType.None:
