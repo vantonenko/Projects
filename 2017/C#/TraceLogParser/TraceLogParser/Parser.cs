@@ -17,7 +17,7 @@ namespace TraceLogParser
         public void Run()
         {
             int order = 0;
-            List<TraceRecord> records = _regex
+            IEnumerable<TraceRecord> records = _regex
                 .Matches(File.ReadAllText(FilePath))
                 .Cast<Match>()
                 .Select(m => new TraceRecord
@@ -30,19 +30,18 @@ namespace TraceLogParser
                     ActionType = m.Groups["action"].Value.ParseActionType(),
                     AsOriginalString = m.Value,
                     Order = order++
-                })
-                .ToList();
+                });
 
-            var processes = records
+            List<ProcessTraceRecords> processes = records
                 .GroupBy(r => r.Pid)
-                .Select(g => new
+                .Select(g => new ProcessTraceRecords
                 {
                     Pid = g.Key,
                     Records = g.OrderBy(r => r.Order).ToList()
                 })
                 .ToList();
 
-            foreach (var process in processes)
+            foreach (ProcessTraceRecords process in processes)
             {
                 File.WriteAllLines(
                     Path.Combine(OutPath, $"Process_{process.Pid}.txt"),
@@ -79,21 +78,21 @@ namespace TraceLogParser
                 // we may have missing exit records
                 while (stack.Count > 0) currentScope = stack.Pop();
 
-                TraceScopeCompact traceScopeCompact = BuildCompactTraceScope(currentScope);
+                TraceScopeCompact traceScopeCompact = BuildTraceScopeCompact(currentScope);
                 string json = JsonConvert.SerializeObject(traceScopeCompact, Formatting.Indented);
                 File.WriteAllText(Path.Combine(OutPath, $"Process_{process.Pid}.json"), json);
             }
         }
 
-        private TraceScopeCompact BuildCompactTraceScope(TraceScope scope)
+        private static TraceScopeCompact BuildTraceScopeCompact(TraceScope scope)
         {
             var traceScopeCompact = new TraceScopeCompact();
 
             foreach (TraceScope traceScope in scope.Entries)
             {
                 traceScopeCompact.Add(
-                    $"{traceScope.Time} [{traceScope.Duration} ms] {traceScope.Actor}:{traceScope.Action} @{traceScope.Order}", 
-                    BuildCompactTraceScope(traceScope));
+                    $"{traceScope.Time} [{traceScope.Duration ?? "?"} ms] {traceScope.Actor}:{traceScope.Action} @{traceScope.Order}", 
+                    BuildTraceScopeCompact(traceScope));
             }
 
             return traceScopeCompact;
