@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 
@@ -13,44 +15,51 @@ namespace TraceLogParser
     /// </summary>
     internal class Parser
     {
-        private readonly string _filePath = ConfigurationManager.AppSettings["TcmLogFilePath"];
+        private static readonly string FilePath = ConfigurationManager.AppSettings["TcmLogFilePath"];
+        private static readonly string FileName = Path.GetFileNameWithoutExtension(FilePath);
         private readonly string _outPath = ConfigurationManager.AppSettings["OutPutFolder"];
 
         private readonly Regex _regex =
-            new Regex(@"(?<time>\d\d:\d\d:\d\d\.\d\d\d) <(?<pid>\d\d\d\d)>(?<depthSpaces> *)(?<actor>[^:]*): (?<action>(.|\n|\r)*?(?=\d\d:\d\d:\d\d\.\d\d\d <\d\d\d\d>)|(.*$))");
+            new Regex(
+                @"(?<time>\d\d:\d\d:\d\d\.\d\d\d) <(?<pid>\d\d\d\d)>(?<depthSpaces> *)(?<actor>[^:]*): (?<action>(.|\n|\r)*?(?=\d\d:\d\d:\d\d\.\d\d\d <\d\d\d\d>)|(.*$))", 
+                RegexOptions.Compiled);
+
+        public const int DecentMaxChunkSize = 500 * 1024 * 1024; // 500 MB
 
         public void Run()
         {
-            int order = 0;
-            IEnumerable<TraceRecord> records = _regex
-                .Matches(File.ReadAllText(_filePath))
-                .Cast<Match>()
-                .Select(m => new TraceRecord
-                {
-                    Time = m.Groups["time"].Value,
-                    Pid = m.Groups["pid"].Value,
-                    DepthSpaces = m.Groups["depthSpaces"].Value,
-                    Actor = m.Groups["actor"].Value,
-                    Action = m.Groups["action"].Value.TrimEnd('\n', '\r'),
-                    ActionType = m.Groups["action"].Value.ParseActionType(),
-                    AsOriginalString = m.Value,
-                    Order = order++
-                });
+            TraceRecord[] records = 
+                ReadAllTextChunks()
+                    .SelectMany(chunk => 
+                        GetTraceRecordMatches(chunk)
+                        .Select(m => new TraceRecord
+                        {
+                            Time = DateTime.Parse(m.Groups["time"].Value),
+                            Pid = int.Parse(m.Groups["pid"].Value),
+                            Depth = m.Groups["depthSpaces"].Value.Length,
+                            Actor = new MatchLocation(m.Groups["actor"].Index, m.Groups["actor"].Length),
+                            Action = new MatchLocation(m.Groups["action"].Index, m.Groups["action"].Length),
+                            ActionType = m.Groups["action"].Value.ParseActionType(),
+                            OriginalStringLocation = new MatchLocation(m.Index, m.Length),
+                            Chunk = chunk
+                        })
+                    )
+                    .ToArray();
 
-            List<ProcessTraceRecords> processes = records
-                .GroupBy(r => r.Pid)
-                .Select(g => new ProcessTraceRecords
+            List<int> pids = records.Select(r => r.Pid).Distinct().ToList();
+
+            IEnumerable<ProcessTraceRecords> processes = pids
+                .Select(pid => new ProcessTraceRecords
                 {
-                    Pid = g.Key,
-                    Records = g.OrderBy(r => r.Order).ToList()
-                })
-                .ToList();
+                    Pid = pid,
+                    Records = records.Where(r => r.Pid == pid)
+                });
 
             foreach (ProcessTraceRecords process in processes)
             {
                 // Produce single process trace log file
                 File.WriteAllLines(
-                    Path.Combine(_outPath, $"Process_{process.Pid}.txt"),
+                    Path.Combine(_outPath, $"{FileName}_{process.Pid}.txt"),
                     process.Records.Select(record => record.AsPatchedString));
 
                 var stack = new Stack<TraceScope>();
@@ -66,7 +75,8 @@ namespace TraceLogParser
                                 Action = record.Action,
                                 Actor = record.Actor,
                                 Time = record.Time,
-                                Order = record.Order
+                                Unique = Guid.NewGuid(),
+                                Chunk = record.Chunk
                             };
                             currentScope.Entries.Add(scope);
                             stack.Push(currentScope);
@@ -87,10 +97,55 @@ namespace TraceLogParser
                 // Produce single process JSON log file (so that can collapse\expand nested records)
                 TraceScopeCompact traceScopeCompact = BuildTraceScopeCompact(currentScope);
                 string json = JsonConvert.SerializeObject(traceScopeCompact, Formatting.Indented);
-                File.WriteAllText(Path.Combine(_outPath, $"Process_{process.Pid}.json"), json);
+                File.WriteAllText(Path.Combine(_outPath, $"{FileName}_{process.Pid}.json"), json);
             }
         }
 
+        /// <summary>
+        /// In order to workaround max string size limit do read the file by chunks.
+        /// A chunk can't be finished on a line which breaks the trace record (trace record can be multiline).
+        /// </summary>
+        private IEnumerable<string> ReadAllTextChunks()
+        {
+            var sb = new StringBuilder();
+            foreach (string line in File.ReadLines(FilePath))
+            {
+                sb.AppendLine(line);
+
+                if (sb.Length > DecentMaxChunkSize && IsExitAction(line))
+                {
+                    yield return sb.ToString();
+                    sb.Clear();
+                }
+            }
+
+            yield return sb.ToString();
+        }
+
+        private bool IsExitAction(string line)
+        {
+            return _regex.Match(line).Groups["action"].Value.ParseActionType() == ActionType.Exit;
+        }
+
+        /// <summary>
+        /// Enumerates through the list of regex matches for the specified chunk of the text.
+        /// </summary>
+        private IEnumerable<Match> GetTraceRecordMatches(string chunk)
+        {
+            int startPosition = 0;
+            while (startPosition < chunk.Length)
+            {
+                Match match = _regex.Match(chunk, startPosition, Math.Min(10 * 1024, chunk.Length - startPosition));
+                if (!match.Success) yield break;
+
+                startPosition = match.Index + match.Length;
+                yield return match;
+            }
+        }
+
+        /// <summary>
+        /// Build the object to be serialized into JSON log file - {"action description": [{"subaction description" : [...]}, {...}]
+        /// </summary>
         private static TraceScopeCompact BuildTraceScopeCompact(TraceScope scope)
         {
             var traceScopeCompact = new TraceScopeCompact();
@@ -98,7 +153,7 @@ namespace TraceLogParser
             foreach (TraceScope traceScope in scope.Entries)
             {
                 traceScopeCompact.Add(
-                    $"{traceScope.Time} [{traceScope.Duration ?? "?"} ms] {traceScope.Actor}:{traceScope.Action} @{traceScope.Order}", 
+                    $"{traceScope.Time:HH:mm:ss:ms} [{(traceScope.Duration == -1 ? "?" : traceScope.Duration.ToString())} ms] {traceScope.ActorString}:{traceScope.ActionString} @{traceScope.Unique}", 
                     BuildTraceScopeCompact(traceScope));
             }
 
