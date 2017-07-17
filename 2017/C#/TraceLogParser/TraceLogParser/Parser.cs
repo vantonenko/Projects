@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -6,10 +7,14 @@ using Newtonsoft.Json;
 
 namespace TraceLogParser
 {
+    /// <summary>
+    /// Split tcm log file onto process specific ones.
+    /// Also to be able to hide\show nested trace records it produces JSON files
+    /// </summary>
     internal class Parser
     {
-        private const string FilePath = @"D:\Workflow\TraceLog_Parser\tcm_trace.log.txt";
-        private const string OutPath = @"D:\Workflow\TraceLog_Parser\";
+        private readonly string _filePath = ConfigurationManager.AppSettings["TcmLogFilePath"];
+        private readonly string _outPath = ConfigurationManager.AppSettings["OutPutFolder"];
 
         private readonly Regex _regex =
             new Regex(@"(?<time>\d\d:\d\d:\d\d\.\d\d\d) <(?<pid>\d\d\d\d)>(?<depthSpaces> *)(?<actor>[^:]*): (?<action>(.|\n|\r)*?(?=\d\d:\d\d:\d\d\.\d\d\d <\d\d\d\d>)|(.*$))");
@@ -18,7 +23,7 @@ namespace TraceLogParser
         {
             int order = 0;
             IEnumerable<TraceRecord> records = _regex
-                .Matches(File.ReadAllText(FilePath))
+                .Matches(File.ReadAllText(_filePath))
                 .Cast<Match>()
                 .Select(m => new TraceRecord
                 {
@@ -43,8 +48,9 @@ namespace TraceLogParser
 
             foreach (ProcessTraceRecords process in processes)
             {
+                // Produce single process trace log file
                 File.WriteAllLines(
-                    Path.Combine(OutPath, $"Process_{process.Pid}.txt"),
+                    Path.Combine(_outPath, $"Process_{process.Pid}.txt"),
                     process.Records.Select(record => record.AsPatchedString));
 
                 var stack = new Stack<TraceScope>();
@@ -78,9 +84,10 @@ namespace TraceLogParser
                 // we may have missing exit records
                 while (stack.Count > 0) currentScope = stack.Pop();
 
+                // Produce single process JSON log file (so that can collapse\expand nested records)
                 TraceScopeCompact traceScopeCompact = BuildTraceScopeCompact(currentScope);
                 string json = JsonConvert.SerializeObject(traceScopeCompact, Formatting.Indented);
-                File.WriteAllText(Path.Combine(OutPath, $"Process_{process.Pid}.json"), json);
+                File.WriteAllText(Path.Combine(_outPath, $"Process_{process.Pid}.json"), json);
             }
         }
 
