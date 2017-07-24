@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 
 namespace TraceLogParser
@@ -13,15 +12,19 @@ namespace TraceLogParser
             //GenerateHugeLogFile();
         }
 
+        /// <summary>
+        /// Used to generate huge dummy log files
+        /// </summary>
         // ReSharper disable once UnusedMember.Local
         private static void GenerateHugeLogFile()
         {
             var allText = File.ReadAllLines(
-                @"C:\Git\ContentManager\Source\Tools\Misc\TcmTraceLogParser\TraceLogParser\bin\Debug\SampleLogFile\tcm_trace-160MB.log.txt");
+                @"C:\Git\ContentManager\Source\Tools\Misc\TcmTraceLogParser\TraceLogParser\bin\x64\Debug\SampleLogFile\tcm_trace-2.7MB.log.txt");
 
-            File.WriteAllLines(
-                @"C:\Git\ContentManager\Source\Tools\Misc\TcmTraceLogParser\TraceLogParser\bin\Debug\SampleLogFile\tcm_trace-~MB.log.txt",
-                Enumerable.Range(0, 7).SelectMany(i => allText));
+            // copy the file content count times
+            const int count = 800;
+            const string outPath = @"C:\Git\ContentManager\Source\Tools\Misc\TcmTraceLogParser\TraceLogParser\bin\x64\Debug\SampleLogFile\tcm_trace-~MB.log.txt";
+            File.WriteAllLines(outPath, Enumerable.Range(0, count).SelectMany(i => allText));
         }
     }
 }

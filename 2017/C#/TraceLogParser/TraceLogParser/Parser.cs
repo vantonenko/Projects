@@ -24,7 +24,7 @@ namespace TraceLogParser
                 @"(?<time>\d\d:\d\d:\d\d\.\d\d\d) <(?<pid>\d\d\d\d)>(?<depthSpaces> *)(?<actor>[^:]*): (?<action>(.|\n|\r)*?(?=\d\d:\d\d:\d\d\.\d\d\d <\d\d\d\d>)|(.*$))", 
                 RegexOptions.Compiled);
 
-        public const int DecentMaxChunkSize = 500 * 1024 * 1024; // 500 MB
+        public const int DecentMaxChunkSize = 500 * 1024 * 1024; // 500M chars
 
         public void Run()
         {
@@ -33,16 +33,17 @@ namespace TraceLogParser
                     .SelectMany(chunk => 
                         GetTraceRecordMatches(chunk)
                         .Select(m => new TraceRecord
-                        {
-                            Time = DateTime.Parse(m.Groups["time"].Value),
-                            Pid = int.Parse(m.Groups["pid"].Value),
-                            Depth = m.Groups["depthSpaces"].Value.Length,
-                            Actor = new MatchLocation(m.Groups["actor"].Index, m.Groups["actor"].Length),
-                            Action = new MatchLocation(m.Groups["action"].Index, m.Groups["action"].Length),
-                            ActionType = m.Groups["action"].Value.ParseActionType(),
-                            OriginalStringLocation = new MatchLocation(m.Index, m.Length),
-                            Chunk = chunk
-                        })
+                            {
+                                Time = DateTime.Parse(m.Groups["time"].Value),
+                                Pid = int.Parse(m.Groups["pid"].Value),
+                                Depth = m.Groups["depthSpaces"].Value.Length,
+                                Actor = new MatchLocation(m.Groups["actor"].Index, m.Groups["actor"].Length),
+                                Action = new MatchLocation(m.Groups["action"].Index, m.Groups["action"].Length),
+                                ActionType = m.Groups["action"].Value.ParseActionType(),
+                                OriginalStringLocation = new MatchLocation(m.Index, m.Length),
+                                Duration = m.Groups["action"].Value.ParseDuration(),
+                                Chunk = chunk
+                            })
                     )
                     .ToArray();
 
@@ -96,8 +97,17 @@ namespace TraceLogParser
 
                 // Produce single process JSON log file (so that can collapse\expand nested records)
                 TraceScopeCompact traceScopeCompact = BuildTraceScopeCompact(currentScope);
-                string json = JsonConvert.SerializeObject(traceScopeCompact, Formatting.Indented);
-                File.WriteAllText(Path.Combine(_outPath, $"{FileName}_{process.Pid}.json"), json);
+                SerializeToFileAsJson(traceScopeCompact, Path.Combine(_outPath, $"{FileName}_{process.Pid}.json"));
+            }
+        }
+
+        private void SerializeToFileAsJson(TraceScopeCompact traceScopeCompact, string filePath)
+        {
+            using (var jsonTextWriter = new StreamWriter(filePath))
+            {
+                JsonSerializer jsonSerializer = JsonSerializer.CreateDefault(new JsonSerializerSettings());
+                jsonSerializer.Formatting = Formatting.Indented;
+                jsonSerializer.Serialize(jsonTextWriter, traceScopeCompact, null);
             }
         }
 
@@ -115,11 +125,13 @@ namespace TraceLogParser
                 if (sb.Length > DecentMaxChunkSize && IsExitAction(line))
                 {
                     yield return sb.ToString();
-                    sb.Clear();
+                    sb = new StringBuilder();
                 }
             }
 
             yield return sb.ToString();
+            // ReSharper disable once RedundantAssignment
+            sb = null;
         }
 
         private bool IsExitAction(string line)
@@ -152,9 +164,7 @@ namespace TraceLogParser
 
             foreach (TraceScope traceScope in scope.Entries)
             {
-                traceScopeCompact.Add(
-                    $"{traceScope.Time:HH:mm:ss:ms} [{(traceScope.Duration == -1 ? "?" : traceScope.Duration.ToString())} ms] {traceScope.ActorString}:{traceScope.ActionString} @{traceScope.Unique}", 
-                    BuildTraceScopeCompact(traceScope));
+                traceScopeCompact.Add(traceScope, BuildTraceScopeCompact(traceScope));
             }
 
             return traceScopeCompact;

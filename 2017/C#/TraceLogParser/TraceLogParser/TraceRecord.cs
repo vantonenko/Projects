@@ -19,7 +19,7 @@ namespace TraceLogParser
         public string ActorString => Chunk?.Substring(Actor.Index, Actor.Length) ?? throw new Exception("Chunk property is null");
         public string Chunk { get; set; }
         public string AsOriginalString => Chunk?.Substring(OriginalStringLocation.Index, OriginalStringLocation.Length) ?? throw new Exception("Chunk property is null");
-        public int Duration => int.Parse(new Regex(@"Duration: (?<duration>\d*) ms.").Match(ActionString).Groups["duration"].Value);
+        public int Duration { get; set; }
         public string AsPatchedString =>
             (ActionType == ActionType.Entry
                 ? AsOriginalString.Replace(new string(' ', Depth), new string(' ', Depth - 2))
@@ -35,6 +35,11 @@ namespace TraceLogParser
 
     public static class StringExtensions
     {
+        private static readonly Regex DurationSubRegex =
+            new Regex(
+                @"Duration: (?<duration>\d*) ms.",
+                RegexOptions.Compiled);
+
         public static ActionType ParseActionType(this string action)
         {
             return
@@ -45,6 +50,12 @@ namespace TraceLogParser
                         : action.Contains(" exit. Duration: ")
                             ? ActionType.Exit
                             : ActionType.None;
+        }
+
+        public static int ParseDuration(this string value)
+        {
+            Match match = DurationSubRegex.Match(value);
+            return match.Success ? int.Parse(match.Groups["duration"].Value) : -1;
         }
     }
 }
