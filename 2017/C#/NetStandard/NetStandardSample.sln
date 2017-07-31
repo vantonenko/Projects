@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ordinary", "Ordinary\Ordina
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetCore", "NetCore\NetCore.csproj", "{757B5C39-2881-464D-A113-8E949FDC10FF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedNetStandard", "SharedNetStandard\SharedNetStandard.csproj", "{3ECFF534-FC59-4AE4-8F8A-E42E6AD879B8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharedNetStandard", "SharedNetStandard\SharedNetStandard.csproj", "{3ECFF534-FC59-4AE4-8F8A-E42E6AD879B8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
