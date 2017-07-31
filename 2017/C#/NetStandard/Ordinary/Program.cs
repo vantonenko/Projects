@@ -8,6 +8,8 @@ namespace Ordinary
         private static void Main()
         {
             Console.WriteLine($"Ordinary framework references net standard library: {NetStandardClass.GetSomeValue()}");
+
+            NetStandardClass.LoadAssembly();
         }
     }
 }
