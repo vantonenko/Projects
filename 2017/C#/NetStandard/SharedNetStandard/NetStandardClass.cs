@@ -1,8 +1,6 @@
-﻿using System;
-
-namespace SharedNetStandard
+﻿namespace SharedNetStandard
 {
-    public class NetStandardClass
+    public static class NetStandardClass
     {
         public static string GetSomeValue() => ".net standard";
     }
