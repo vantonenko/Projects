@@ -22,7 +22,7 @@ namespace SharedNetStandard
             Type type = asm.GetType("OrdinaryFrameworkLibrary.SomeClass");
 
             Console.WriteLine(
-                $"Net standard library dynamically loaded another net standard library and got a type from it: {type}");
+                $"Net standard library dynamically loaded 4.6.2 library and got a type from it: {type}");
         }
     }
 }
