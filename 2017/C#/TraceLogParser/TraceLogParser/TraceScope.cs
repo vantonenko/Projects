@@ -15,8 +15,4 @@ namespace TraceLogParser
         public string Chunk { get; set; }
         public List<TraceScope> Entries { get; set; } = new List<TraceScope>();
     }
-
-    internal class TraceScopeCompact : Dictionary<string, TraceScopeCompact>
-    {
-    }
 }
