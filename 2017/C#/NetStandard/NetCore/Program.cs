@@ -9,7 +9,7 @@ namespace NetCore
         {
             Console.WriteLine($"Core framework references net standard library: {NetStandardClass.GetSomeValue()}");
 
-            NetStandardClass.LoadAssembly();
+            NetStandardClass.LoadStandardAssembly();
         }
     }
 }

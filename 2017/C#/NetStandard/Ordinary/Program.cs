@@ -9,7 +9,9 @@ namespace Ordinary
         {
             Console.WriteLine($"Ordinary framework references net standard library: {NetStandardClass.GetSomeValue()}");
 
-            NetStandardClass.LoadAssembly();
+            NetStandardClass.LoadStandardAssembly();
+
+            NetStandardClass.Load462Assembly();
         }
     }
 }
