@@ -7,31 +7,39 @@ function Puzzle15Solver() {
     this.initialState = stateGoal.shuffle();
     this.stateStack = [];
 
-    var getPossibleMovesIterator = function*(state) {
+    var getPossibleMoves = function(state) {
+        var moves = [];
+
         for (let move of State.moves) {
             if (state.isMoveExceedBoundary(move)) continue;
             var nextMove = state.applyMove(move);
             if (visitState[nextMove.hash]) continue;
-            yield nextMove;
+            moves.push(nextMove);
         }
+
+        return moves;
     }
 
-    this.computeIterator = function*() {
-        this.stateStack.push(this.initialState);
+    this.computeFunc = function(state) {
+        if (this.stateStack.length > 1000) return false;
 
-        do {
-            var state = this.stateStack.last();
-            visitState[state.hash] = true;
-            if (state.equals(stateGoal)) yield true;
-            
-            var possibleMoves = getPossibleMovesIterator(state);
-            var nextMove = possibleMoves.next();
-            if (nextMove.value) {
-                this.stateStack.push(nextMove.value);
-            } else {
-                this.stateStack.pop();
-            }
-            yield false;
-        } while (this.stateStack.length > 0);
+        this.stateStack.push(state);
+        visitState[state.hash] = true;
+        
+        if (stateGoal.equals(state)) return true;
+
+        var possibleMoves = getPossibleMoves(state);
+
+        for (var i = 0; i < possibleMoves.length; i++) {
+            var result = this.computeFunc(possibleMoves[i]);
+            if (result) return true;
+        }
+        
+        this.stateStack.pop();
+        return false;
+    }
+
+    this.compute = function() {
+        this.computeFunc(this.initialState)
     }
 }

@@ -30,17 +30,10 @@
 
             visualizeState(solver.initialState, "div#initial");
 
-            var iterator = solver.computeIterator();
-            var interval = setInterval(() => {
-                for (let i of new Array(10 * 1000)) {
-                    var iteration = iterator.next();
-                    if (iteration.value || iteration.done) {
-                        clearInterval(interval);
-                        break;
-                    }
-                }
-                visualizeState(solver.stateStack.last());
-            }, 0);
+            solver.compute();
+
+            visualizeState(solver.stateStack.last());
+
         </script>
     </body>
 </html>
