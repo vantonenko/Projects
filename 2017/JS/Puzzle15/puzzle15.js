@@ -24,8 +24,7 @@ function Puzzle15Solver() {
             visitState[state.hash] = true;
             if (state.equals(stateGoal)) yield true;
             
-            var possibleMoves = getPossibleMovesIterator(state);
-            var nextMove = possibleMoves.next();
+            var nextMove = getPossibleMovesIterator(state).next();
             if (nextMove.value) {
                 this.stateStack.push(nextMove.value);
             } else {
