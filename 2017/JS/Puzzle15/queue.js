@@ -2,11 +2,11 @@ function Queue() {
     var arr = [];
 
     this.enqueue = function(val) {
-        arr.unshift(val);
+        arr.push(val);
     }
 
     this.dequeue = function() {
-        return arr.pop();
+        return arr.shift();
     }
 
     this.length = function() {

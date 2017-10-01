@@ -5,7 +5,7 @@ function Puzzle15Solver() {
     var stateGoal = new State(sideLength);
 
     this.initialState = stateGoal.shuffle();
-    this.stateQueue = new Queue();
+    this.queue = new Queue();
 
     this.currentStateNode = new StateNode(this.initialState);
 
@@ -19,10 +19,10 @@ function Puzzle15Solver() {
     }
 
     this.computeIterator = function*() {
-        this.stateQueue.enqueue(this.currentStateNode);
+        this.queue.enqueue(this.currentStateNode);
 
-        while (this.stateQueue.length() > 0) {
-            this.currentStateNode = this.stateQueue.dequeue();
+        while (this.queue.length() > 0) {
+            this.currentStateNode = this.queue.dequeue();
             var currentState = this.currentStateNode.state;
             
             visitState[currentState.hash] = true;
@@ -31,9 +31,9 @@ function Puzzle15Solver() {
             var possibleStates = getNextStates(currentState);
             for (var state of possibleStates) {
                 var nextStateNode = new StateNode(state, this.currentStateNode);
-                this.stateQueue.enqueue(nextStateNode);
+                this.queue.enqueue(nextStateNode);
             }
 
-        } while (this.stateQueue.length > 0);
+        } while (this.queue.length > 0);
     }
 }
