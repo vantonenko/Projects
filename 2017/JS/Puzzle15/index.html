@@ -2,6 +2,8 @@
 <html>
     <header>
         <script src="arrayExtensions.js"></script>
+        <script src="queue.js"></script>
+        <script src="stateNode.js"></script>
         <script src="state.js"></script>
         <script src="puzzle15.js"></script>
         <style>
@@ -23,12 +25,12 @@
                     return;
                 }
 
-                var printState = state.toString();
+                var printState = state.state.toString();
                 element.innerHTML = 
-                    `${printState.replace(/\/n/g, "<br>")}<br><br>stackSize:${solver.stateStack.length}`;
+                    `${printState.replace(/\/n/g, "<br>")}<br><br>stackSize:${state.depth}`;
             }
 
-            visualizeState(solver.initialState, "div#initial");
+            visualizeState(solver.currentStateNode, "div#initial");
 
             var iterator = solver.computeIterator();
             var interval = setInterval(() => {
@@ -39,7 +41,7 @@
                         break;
                     }
                 }
-                visualizeState(solver.stateStack.last());
+                visualizeState(solver.currentStateNode);
             }, 0);
         </script>
     </body>

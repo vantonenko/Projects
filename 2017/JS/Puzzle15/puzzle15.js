@@ -5,9 +5,11 @@ function Puzzle15Solver() {
     var stateGoal = new State(sideLength);
 
     this.initialState = stateGoal.shuffle();
-    this.stateStack = [];
+    this.stateQueue = new Queue();
 
-    var getPossibleMovesIterator = function*(state) {
+    this.currentStateNode = new StateNode(this.initialState);
+
+    var getNextStates = function*(state) {
         for (let move of State.moves) {
             if (state.isMoveExceedBoundary(move)) continue;
             var nextMove = state.applyMove(move);
@@ -17,21 +19,21 @@ function Puzzle15Solver() {
     }
 
     this.computeIterator = function*() {
-        this.stateStack.push(this.initialState);
+        this.stateQueue.enqueue(this.currentStateNode);
 
-        do {
-            var state = this.stateStack.last();
-            visitState[state.hash] = true;
-            if (state.equals(stateGoal)) yield true;
+        while (this.stateQueue.length() > 0) {
+            this.currentStateNode = this.stateQueue.dequeue();
+            var currentState = this.currentStateNode.state;
             
-            var possibleMoves = getPossibleMovesIterator(state);
-            var nextMove = possibleMoves.next();
-            if (nextMove.value) {
-                this.stateStack.push(nextMove.value);
-            } else {
-                this.stateStack.pop();
+            visitState[currentState.hash] = true;
+            yield currentState.equals(stateGoal);
+            
+            var possibleStates = getNextStates(currentState);
+            for (var state of possibleStates) {
+                var nextStateNode = new StateNode(state, this.currentStateNode);
+                this.stateQueue.enqueue(nextStateNode);
             }
-            yield false;
-        } while (this.stateStack.length > 0);
+
+        } while (this.stateQueue.length > 0);
     }
 }
