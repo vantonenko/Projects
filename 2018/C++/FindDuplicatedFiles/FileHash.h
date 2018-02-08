@@ -3,32 +3,10 @@
 #include <fstream>
 #include <sstream>
 #include <cerrno>
-
 #include <string>
+#include <memory>
+
 #include "StringHash.h"
-
-template<class TItem>
-class InMemoryBuffer {
-private:
-    long _size;
-    TItem *_buff;
-
-public:
-    InMemoryBuffer(long size): _size(size) {
-        _buff = new TItem[size];
-    }
-    
-    ~InMemoryBuffer() {
-        delete []_buff;
-    }
-
-    long GetSize() const { return _size; }
-    TItem* GetBuffer() const { return _buff; }
-
-    operator TItem* () const {
-        return GetBuffer();
-    }
-};
 
 class FileHash {
 public:
@@ -40,11 +18,11 @@ public:
         long fileSize = ftell(fh);
         fseek(fh, 0L, SEEK_SET);
 
-        InMemoryBuffer<unsigned char> buf(fileSize);
+        std::unique_ptr<unsigned char[]> buf(new unsigned char[fileSize]);
         
-        fread(buf, fileSize, 1, fh);
+        fread(buf.get(), fileSize, 1, fh);
         fclose(fh);
 
-        return StringHash::CalculateHash(buf, fileSize);
+        return StringHash::CalculateHash(buf.get(), fileSize);
     }
 };
