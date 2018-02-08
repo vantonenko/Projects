@@ -8,9 +8,13 @@
 class StringHash {
 public:
     static std::string CalculateHash(const InMemoryBuffer<unsigned char> &data) {
+        return CalculateHash(data, data.Size());
+    }
+
+    static std::string CalculateHash(unsigned char *data, long size) {
         unsigned char digest[MD5_DIGEST_LENGTH];
 
-        MD5(data, data.Size(), (unsigned char*)&digest);
+        MD5(data, size, (unsigned char*)&digest);
         
         char mdString[MD5_DIGEST_LENGTH * 2 + 1];
  
