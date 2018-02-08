@@ -1,10 +1,6 @@
 #pragma once
 
-#include <fstream>
-#include <sstream>
-#include <cerrno>
 #include <string>
-#include <memory>
 
 #include "StringHash.h"
 #include "InMemoryBuffer.h"
@@ -15,8 +11,9 @@ public:
 
         InMemoryBuffer<unsigned char> buf = GetFileContent(path);
 
-        return StringHash::CalculateHash(buf, buf.Size());
+        return StringHash::CalculateHash(buf);
     }
+
 private:
     static InMemoryBuffer<unsigned char> GetFileContent(const std::string &path) {
         FILE *fh = fopen(path.c_str(), "r");
