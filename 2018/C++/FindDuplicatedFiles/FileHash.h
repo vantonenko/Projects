@@ -1,30 +1,32 @@
 #pragma once
 
-#include <fstream>
-#include <sstream>
-#include <cerrno>
-
 #include <string>
+
 #include "StringHash.h"
+#include "InMemoryBuffer.h"
 
 class FileHash {
 public:
     static std::string CalculateHash(const std::string &path) {
-        const std::string &content = GetFileContent(path);
 
-        return StringHash::CalculateHash(content);
+        InMemoryBuffer<unsigned char> buf = GetFileContent(path);
+
+        return StringHash::CalculateHash(buf);
     }
-private:
-    static const std::string GetFileContent(const std::string &path) {
-        std::ifstream in(path, std::ios::in | std::ios::binary);
-        if (in)
-        {
-            std::ostringstream contents;
-            contents << in.rdbuf();
-            in.close();
-            return contents.str();
-        }
 
-        throw(errno);
+private:
+    static InMemoryBuffer<unsigned char> GetFileContent(const std::string &path) {
+        FILE *fh = fopen(path.c_str(), "r");
+        fseek(fh, 0L, SEEK_END);
+        
+        long fileSize = ftell(fh);
+        fseek(fh, 0L, SEEK_SET);
+
+        InMemoryBuffer<unsigned char> buf(fileSize);
+        
+        fread(buf, fileSize, 1, fh);
+        fclose(fh);
+
+        return buf;
     }
 };
