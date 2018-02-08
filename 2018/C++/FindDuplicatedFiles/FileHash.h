@@ -7,6 +7,29 @@
 #include <string>
 #include "StringHash.h"
 
+template<class TItem>
+class InMemoryBuffer {
+private:
+    long _size;
+    TItem *_buff;
+
+public:
+    InMemoryBuffer(long size): _size(size) {
+        _buff = new TItem[size];
+    }
+    
+    ~InMemoryBuffer() {
+        delete []_buff;
+    }
+
+    long GetSize() const { return _size; }
+    TItem* GetBuffer() const { return _buff; }
+
+    operator TItem* () const {
+        return GetBuffer();
+    }
+};
+
 class FileHash {
 public:
     static std::string CalculateHash(const std::string &path) {
@@ -16,15 +39,12 @@ public:
         
         long fileSize = ftell(fh);
         fseek(fh, 0L, SEEK_SET);
+
+        InMemoryBuffer<unsigned char> buf(fileSize);
         
-        unsigned char *buf = new unsigned char[fileSize];
         fread(buf, fileSize, 1, fh);
         fclose(fh);
 
-        std::string result = StringHash::CalculateHash(buf, fileSize);
-
-        delete[] buf;
-
-        return result;
+        return StringHash::CalculateHash(buf, fileSize);
     }
 };
