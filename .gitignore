@@ -21,6 +21,7 @@ build/
 bld/
 [Bb]in/
 [Oo]bj/
+*.out
 
 # Visual Studio 2015 cache/options directory
 .vs/
@@ -230,3 +231,4 @@ ModelManifest.xml
 /Source/SDL.MediaDelivery/SDL.MediaDelivery.DeliveryService/MediaDelivery.xml
 /Source/WebService/Service/ApiDocumentation/Help/SDL Media Manager.chm
 /Deploy/
+2018/C++/FindDuplicatedFiles/a.out
