@@ -10,21 +10,21 @@
 class FileHash {
 public:
     static std::string CalculateHash(const std::string &path) {
-        const std::string &content = GetFileContent(path);
+        
+        FILE *fh = fopen(path.c_str(), "r");
+        fseek(fh, 0L, SEEK_END);
+        
+        long fileSize = ftell(fh);
+        fseek(fh, 0L, SEEK_SET);
+        
+        unsigned char *buf = new unsigned char[fileSize];
+        fread(buf, fileSize, 1, fh);
+        fclose(fh);
 
-        return StringHash::CalculateHash(content);
-    }
-private:
-    static const std::string GetFileContent(const std::string &path) {
-        std::ifstream in(path, std::ios::in | std::ios::binary);
-        if (in)
-        {
-            std::ostringstream contents;
-            contents << in.rdbuf();
-            in.close();
-            return contents.str();
-        }
+        std::string result = StringHash::CalculateHash(buf, fileSize);
 
-        throw(errno);
+        delete[] buf;
+
+        return result;
     }
 };
