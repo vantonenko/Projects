@@ -17,6 +17,7 @@ namespace FindDuplicateFiles
 
             var result = Directory
                 .EnumerateFiles(path, "*", SearchOption.AllDirectories)
+                .AsParallel()
                 .Select(filePath => new 
                     {
                         FilePath = filePath,
