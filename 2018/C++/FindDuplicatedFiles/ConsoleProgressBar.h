@@ -8,16 +8,20 @@ private:
     int _doneItems;
     int _percentage;
     int _step;
+    int _length;
 
 public:
-    ConsoleProgressBar(int goalItems, int step = 1) : 
+    ConsoleProgressBar(int goalItems, int step = 1, int length = 50) : 
         _goalItems(goalItems), 
         _doneItems(0), 
         _percentage(0),
-        _step(step) { }
+        _step(step),
+        _length(length) { }
     
     void Draw() {
-        std::cout << _percentage << "%\r" << std::flush;
+        std::string dashes(_percentage * _length / 100, '#');
+        std::string spaces(_length - _percentage * _length / 100, '_');
+        std::cout << "[" << dashes << spaces << "] (" << _percentage << "%)\r" << std::flush;
 
         if (_percentage > 99) {
             std::cout << std::endl;
