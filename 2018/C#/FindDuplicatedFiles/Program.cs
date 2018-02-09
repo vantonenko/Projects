@@ -8,7 +8,7 @@ namespace FindDuplicateFiles
     internal static class Program
     {
         const string path = @"./../..";
-
+        
         private static void Main(string[] args)
         {
             Console.WriteLine($"Start looking for duplicated files in '{path}' folder...");
@@ -37,8 +37,12 @@ namespace FindDuplicateFiles
             var s = result.Count == 1 ? string.Empty : "s";
             Console.WriteLine($"There {isAre} {result.Count} duplicated file{s}:");
 
-            int counter = 1;
-            Console.WriteLine(string.Join("\n", result.Select(r => $"{counter++}:\n{string.Join(",\n", r.Files.Select(f => $"\t'{f}'"))}")));
+            int counter = 0;
+            Console.WriteLine(
+                string.Join(
+                    "\n", 
+                    result.Select(r => 
+                        $"{++counter}:\n{string.Join(",\n", r.Files.Select(f => $"\t'{f}'"))}")));
 
             Console.WriteLine($"Time spent for the whole LINQ query: {timeSpent.TotalMilliseconds} ms.");
         }
