@@ -6,7 +6,7 @@ class Parallel {
 public:
     template<class TIterator, class TItem>
     static void ForEach(TIterator begin, TIterator end, std::function<void(TItem&)> action) {
-        auto it = begin;
+        TIterator it = begin;
 
         const size_t nCores = std::thread::hardware_concurrency();
         std::vector<std::thread> threads(nCores);
