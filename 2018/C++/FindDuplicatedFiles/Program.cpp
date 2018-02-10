@@ -12,7 +12,7 @@
 #include "FileHash.h"
 #include "VectorUtilities.h"
 #include "ConsoleProgressBar.h"
-#include "ParallelForEach.h"
+#include "Parallel.h"
 
 using namespace std;
 
@@ -23,7 +23,7 @@ struct FileEntry {
 
 int main() {
     const string path = "./../..";
-    
+
     cout << "Getting a list of files in '" << path << "' directory..." << endl;
 
     vector<string> files;
@@ -41,7 +41,8 @@ int main() {
     ConsoleProgressBar progressBar(files.size());
     vector<FileEntry> entries;
     mutex updateMutex;
-    parallel_for_each<std::vector<string>::const_iterator, string>(
+    
+    Parallel::ForEach<std::vector<string>::const_iterator, string>(
         files.begin(), 
         files.end(), 
         [&entries, &progressBar, &updateMutex](const string &path) {
