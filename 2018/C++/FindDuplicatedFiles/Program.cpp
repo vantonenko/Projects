@@ -75,6 +75,5 @@ int main() {
         }
     }
 
-    cout << 
-        "Time spent for calculating hashes: " << swResult.milliseconds << " ms." << endl;
+    cout << "Time spent for calculating hashes: " << swResult.milliseconds << " ms." << endl;
 }
