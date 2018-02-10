@@ -6,13 +6,12 @@
 #include <vector>
 #include <map>
 
-#include <time.h>
-
 #include "Directory.h"
 #include "FileHash.h"
 #include "VectorUtilities.h"
 #include "ConsoleProgressBar.h"
 #include "Parallel.h"
+#include "StopWatch.h"
 
 using namespace std;
 
@@ -23,7 +22,7 @@ struct FileEntry {
 
 int main() {
     const string path = "./../..";
-
+    
     cout << "Getting a list of files in '" << path << "' directory..." << endl;
 
     vector<string> files;
@@ -35,27 +34,27 @@ int main() {
 
     cout << "Calculating hashes..." << endl;
 
-    timespec ts_beg, ts_end;
-    clock_gettime(CLOCK_MONOTONIC, &ts_beg);
-
     ConsoleProgressBar progressBar(files.size());
     vector<FileEntry> entries;
     mutex updateMutex;
-    
-    Parallel::ForEach<std::vector<string>::const_iterator, string>(
-        files.begin(), 
-        files.end(), 
-        [&entries, &progressBar, &updateMutex](const string &path) {
-            FileEntry entry;
-            entry.filePath = path;
-            entry.fileHash = FileHash::CalculateHash(path);
-            
-            lock_guard<mutex> lock(updateMutex);
-            entries.push_back(entry);
-            progressBar.ReportDoneItem();
-        });
 
-    clock_gettime(CLOCK_MONOTONIC, &ts_end);
+    StopWatchResult swResult;
+    {
+        StopWatch stopWatch(&swResult);
+        
+        Parallel::ForEach<std::vector<string>::const_iterator, string>(
+            files.begin(), 
+            files.end(), 
+            [&entries, &progressBar, &updateMutex](const string &path) {
+                FileEntry entry;
+                entry.filePath = path;
+                entry.fileHash = FileHash::CalculateHash(path);
+                
+                lock_guard<mutex> lock(updateMutex);
+                entries.push_back(entry);
+                progressBar.ReportDoneItem();
+            });
+    }
 
     cout << "Checking if there are any duplicated files..." << endl;
 
@@ -77,7 +76,5 @@ int main() {
     }
 
     cout << 
-        "Time spent for calculating hashes: " << 
-        (ts_end.tv_sec - ts_beg.tv_sec) * 1000 + (ts_end.tv_nsec - ts_beg.tv_nsec) / 1000000 << 
-        " ms." << endl;
+        "Time spent for calculating hashes: " << swResult.milliseconds << " ms." << endl;
 }
