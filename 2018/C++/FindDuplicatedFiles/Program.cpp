@@ -12,6 +12,7 @@
 #include "FileHash.h"
 #include "VectorUtilities.h"
 #include "ConsoleProgressBar.h"
+#include "ParallelForEach.h"
 
 using namespace std;
 
@@ -22,7 +23,7 @@ struct FileEntry {
 
 int main() {
     const string path = "./../..";
-
+    
     cout << "Getting a list of files in '" << path << "' directory..." << endl;
 
     vector<string> files;
@@ -35,25 +36,30 @@ int main() {
     cout << "Calculating hashes..." << endl;
 
     timespec ts_beg, ts_end;
-    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &ts_beg);
+    clock_gettime(CLOCK_MONOTONIC, &ts_beg);
 
     ConsoleProgressBar progressBar(files.size());
     vector<FileEntry> entries;
-    for (auto path : files) {
-        FileEntry entry;
-        entry.filePath = path;
-        entry.fileHash = FileHash::CalculateHash(path);
-        
-        entries.push_back(entry);
-        progressBar.ReportDoneItem();
-    }
+    mutex updateMutex;
+    parallel_for_each<std::vector<string>::const_iterator, string>(
+        files.begin(), 
+        files.end(), 
+        [&entries, &progressBar, &updateMutex](const string &path) {
+            FileEntry entry;
+            entry.filePath = path;
+            entry.fileHash = FileHash::CalculateHash(path);
+            
+            lock_guard<mutex> lock(updateMutex);
+            entries.push_back(entry);
+            progressBar.ReportDoneItem();
+        });
 
-    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &ts_end);
+    clock_gettime(CLOCK_MONOTONIC, &ts_end);
 
     cout << "Checking if there are any duplicated files..." << endl;
 
     map<string, vector<FileEntry>> groups = 
-        VectorUtilities<string, FileEntry>::GroupBy(
+        VectorUtilities::GroupBy<string, FileEntry>(
             entries, 
             [](const FileEntry &entry) {
                 return entry.fileHash; 

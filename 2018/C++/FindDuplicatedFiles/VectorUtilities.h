@@ -3,9 +3,9 @@
 #include <map>
 #include <vector>
 
-template <class TKey, class TEntry>
 class VectorUtilities {
 public:
+    template <class TKey, class TEntry>
     static std::map<TKey, std::vector<TEntry>> GroupBy(std::vector<TEntry> items, TKey (*keyFunc)(const TEntry&)) {
         std::map<TKey, std::vector<TEntry>> result;
 
