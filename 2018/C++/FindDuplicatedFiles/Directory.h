@@ -2,7 +2,6 @@
 
 #include <string>
 #include <functional>
-#include <cstring>
 
 #include <dirent.h>
 
