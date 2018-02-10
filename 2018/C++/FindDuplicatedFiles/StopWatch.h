@@ -4,6 +4,8 @@
 
 struct StopWatchResult {
     int milliseconds;
+
+    StopWatchResult(): milliseconds(0) {}
 };
 
 class StopWatch {
