@@ -1,4 +1,5 @@
-// clang++ -std=c++14 -stdlib=libc++ Program.cpp -lcrypto -O3; ./a.out
+// complie & run - clang++ -std=c++14 -stdlib=libc++ Program.cpp -lcrypto -O3; ./a.out
+// complie, run & analyise memory faults - clang++ -std=c++14 -stdlib=libc++ Program.cpp -lcrypto -O3 -fsanitize=address -fno-omit-frame-pointer; ./a.out
 
 #include <iostream>
 
@@ -22,7 +23,7 @@ struct FileEntry {
 
 int main() {
     const string path = "./../..";
-    
+
     cout << "Getting a list of files in '" << path << "' directory..." << endl;
 
     vector<string> files;
@@ -68,7 +69,12 @@ int main() {
     int count = 0;
     for (auto group : groups) {
         if (group.second.size() > 1) {
-            cout << "#" << ++count << ": " << endl;
+            if (group.first == "") {
+                cout << "Unable to open files:" << endl;
+            } else {
+                cout << "#" << ++count << ": " << endl;
+            }
+
             for (auto item : group.second) {
                 cout << "\t'" << item.filePath << "'" << endl;
             }
