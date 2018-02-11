@@ -11,12 +11,17 @@ public:
 
         InMemoryBuffer<unsigned char> buf = GetFileContent(path);
 
+        if (buf.Size() == 0) return "";
+
         return StringHash::CalculateHash(buf);
     }
 
 private:
     static InMemoryBuffer<unsigned char> GetFileContent(const std::string &path) {
         FILE *fh = fopen(path.c_str(), "r");
+
+        if (fh == nullptr) return InMemoryBuffer<unsigned char>(0);
+
         fseek(fh, 0L, SEEK_END);
         
         long fileSize = ftell(fh);
