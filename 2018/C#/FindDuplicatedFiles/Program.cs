@@ -23,6 +23,7 @@ namespace FindDuplicateFiles
                         FilePath = filePath,
                         Hash = filePath.CalculateFileHash()
                     })
+                .Where(o => !string.IsNullOrEmpty(o.Hash)) // ignore the files failed to be opened
                 .GroupBy(o => o.Hash)
                 .Where(g => g.Count() > 1)
                 .Select(g => new 
@@ -55,9 +56,16 @@ namespace FindDuplicateFiles
         {
             using (MD5 md5 = MD5.Create())
             {
-                using (FileStream stream = File.OpenRead(filePath))
+                try 
                 {
-                    return BitConverter.ToString(md5.ComputeHash(stream));
+                    using (FileStream stream = File.OpenRead(filePath))
+                    {
+                        return BitConverter.ToString(md5.ComputeHash(stream));
+                    }
+                }
+                catch 
+                {
+                    return string.Empty;
                 }
             }
         } 
