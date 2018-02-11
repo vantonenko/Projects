@@ -1,32 +1,39 @@
 #pragma once
 
 #include <string>
+#include <memory>
+#include <fstream>
 
-#include "StringHash.h"
-#include "InMemoryBuffer.h"
+#include <openssl/md5.h>
 
 class FileHash {
 public:
-    static std::string CalculateHash(const std::string &path) {
-
-        InMemoryBuffer<unsigned char> buf = GetFileContent(path);
-
-        return StringHash::CalculateHash(buf);
-    }
-
-private:
-    static InMemoryBuffer<unsigned char> GetFileContent(const std::string &path) {
-        FILE *fh = fopen(path.c_str(), "r");
-        fseek(fh, 0L, SEEK_END);
+    static std::string CalculateHash(const std::string &path) {        
+        const int buffSize = 1024 * 1024;
         
-        long fileSize = ftell(fh);
-        fseek(fh, 0L, SEEK_SET);
+        FILE *fh = fopen(path.c_str(), "rb");
+        if (fh == nullptr) return "";
 
-        InMemoryBuffer<unsigned char> buf(fileSize);
+        MD5_CTX mdContext;
+        MD5_Init(&mdContext);
         
-        fread(buf, fileSize, 1, fh);
-        fclose(fh);
+        auto ptr = std::make_unique<unsigned char[]>(buffSize);
+        unsigned char *data = ptr.get();
 
-        return buf;
+        int bytes;
+        while ((bytes = fread(data, 1, buffSize, fh)) != 0) {
+            MD5_Update(&mdContext, data, bytes);
+        }
+        fclose (fh);
+        
+        unsigned char digest[MD5_DIGEST_LENGTH];
+        MD5_Final(digest, &mdContext);
+        
+        char mdString[MD5_DIGEST_LENGTH * 2 + 1];
+        for (int i = 0; i < MD5_DIGEST_LENGTH; i++) {
+            sprintf(&mdString[i * 2], "%02x", (unsigned int)digest[i]);
+        }
+
+        return mdString;
     }
 };
