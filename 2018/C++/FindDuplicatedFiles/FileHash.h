@@ -24,6 +24,7 @@ public:
         while ((bytes = fread(data, 1, buffSize, fh)) != 0) {
             MD5_Update(&mdContext, data, bytes);
         }
+        
         fclose (fh);
         
         unsigned char digest[MD5_DIGEST_LENGTH];
