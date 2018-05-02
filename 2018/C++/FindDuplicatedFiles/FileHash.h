@@ -10,22 +10,19 @@ class FileHash {
 public:
     static std::string CalculateHash(const std::string &path) {        
         const int buffSize = 1024 * 1024;
-        
-        FILE *fh = fopen(path.c_str(), "rb");
-        if (fh == nullptr) return "";
+
+        std::ifstream file(path.c_str(), std::ifstream::binary);
 
         MD5_CTX mdContext;
         MD5_Init(&mdContext);
         
-        auto ptr = std::make_unique<unsigned char[]>(buffSize);
-        unsigned char *data = ptr.get();
+        auto ptr = std::make_unique<char[]>(buffSize);
+        char *data = ptr.get();
 
-        int bytes;
-        while ((bytes = fread(data, 1, buffSize, fh)) != 0) {
-            MD5_Update(&mdContext, data, bytes);
+        while (!file.eof()) {
+            file.read(data, buffSize);
+            MD5_Update(&mdContext, data, file.gcount());
         }
-        
-        fclose (fh);
         
         unsigned char digest[MD5_DIGEST_LENGTH];
         MD5_Final(digest, &mdContext);
