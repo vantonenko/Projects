@@ -8,7 +8,7 @@ private:
     int _doneItems;
     int _percentage;
     int _step;
-    int _length; // the lenght of the drawn progress bar
+    int _length; // the length of the drawn progress bar
 
 public:
     ConsoleProgressBar(int goalItems, int step = 1, int length = 50) : 
