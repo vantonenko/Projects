@@ -1,5 +1,5 @@
 // complie & run - clang++ -std=c++14 -stdlib=libc++ Program.cpp -lcrypto -O3; ./a.out
-// complie, run & analyise memory faults - clang++ -std=c++14 -stdlib=libc++ Program.cpp -lcrypto -O3 -fsanitize=address -fno-omit-frame-pointer; ./a.out
+// complie, run & analyse memory faults - clang++ -std=c++14 -stdlib=libc++ Program.cpp -lcrypto -O3 -fsanitize=address -fno-omit-frame-pointer; ./a.out
 
 #include <iostream>
 
