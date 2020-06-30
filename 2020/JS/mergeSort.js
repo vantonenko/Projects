@@ -3,7 +3,10 @@ var merge = function(left, right) {
     var iLeft = 0;
     var iRight = 0;
     while (iLeft < left.length || iRight < right.length) {
-        merged.push(iLeft < left.length && iRight < right.length && left[iLeft] < right[iRight] || iRight >= right.length ? left[iLeft++] : right[iRight++]);
+        merged.push(
+            iLeft < left.length && iRight < right.length && left[iLeft] < right[iRight] || iRight >= right.length 
+                ? left[iLeft++] 
+                : right[iRight++]);
     }
     return merged;
 }
@@ -14,7 +17,8 @@ var sort = function(input) {
         case 1:
             return input;
         case 2:
-            return input[0] < input [1] ? [input[0], input[1]] : [input[1], input[0]];
+            var [a, b] = input;
+            return a < b ? [a, b] : [b, a];
         default:
             var median = Math.trunc(input.length / 2);
             var left = sort(input.slice(0, median));
