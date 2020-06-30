@@ -24,7 +24,7 @@ function sort(input) {
         case 1:
             return input;
         case 2:
-            var a = input[0], b = input[1];
+            var [a, b] = input;
             return a < b ? [a, b] : [b, a];
         default:
             var base = input[rand(0, input.length)];
